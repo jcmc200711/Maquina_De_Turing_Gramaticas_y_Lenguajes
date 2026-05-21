@@ -277,7 +277,7 @@ export default function App() {
                 <span style={styles.glossaryTerm}>$\Sigma$ (Alfabeto de Entrada):</span> Símbolos permitidos en la cadena original que escribe el usuario antes de iniciar la computación.
               </div>
               <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>$\Gamma$ (Alfabeto de la Cinta):</span> Símbolos totales que la máquina puede escribir. Incluye a $\Sigma$ y al símbolo Blanco ($\Gamma > \Sigma$).
+                <span style={styles.glossaryTerm}>$\Gamma$ (Alfabeto de la Cinta):</span> Símbolos totales que la máquina puede escribir. Incluye a $\Sigma$ y al símbolo Blanco ($\Gamma &gt; \Sigma$).
               </div>
               <div style={styles.glossaryItem}>
                 <span style={styles.glossaryTerm}>$B$ o $\_$ (Símbolo Blanco):</span> Carácter de espacio vacío que llena la cinta hasta el infinito a la izquierda y derecha.
