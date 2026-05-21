@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 // BANCO DE ALGORITMOS PRECONFIGURADOS
 const ALGORITMOS = {
@@ -131,7 +131,6 @@ const styles = {
   headerTitle: { fontSize: '32px', fontWeight: '800', letterSpacing: '3px', background: `linear-gradient(90deg, ${C.neon}, ${C.green})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 },
   headerSub: { fontSize: '12px', color: C.textMid, letterSpacing: '2px', marginTop: '4px' },
   
-  // Estructura de Glosarios Completa
   glossaryGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' },
   glossaryCard: { background: `${C.card}bb`, border: `1px solid ${C.cardBorder}`, borderRadius: '8px', padding: '16px' },
   glossaryItem: { fontSize: '11px', marginBottom: '10px', lineHeight: '1.4' },
@@ -146,7 +145,6 @@ const styles = {
   btnPrimary: { flex: 1, background: `linear-gradient(135deg, ${C.green}33, ${C.green}11)`, border: `2px solid ${C.green}`, borderRadius: '4px', color: C.green, fontFamily: 'inherit', fontSize: '11px', fontWeight: '800', padding: '10px', cursor: 'pointer', letterSpacing: '1px' },
   btnSecondary: { background: 'transparent', border: `1px solid ${C.cardBorder}`, borderRadius: '4px', color: C.textMid, fontFamily: 'inherit', fontSize: '11px', padding: '10px 16px', cursor: 'pointer' },
   
-  // Cinta Mejorada Ultra High-Contrast
   tapeWrap: { display: 'flex', alignItems: 'center', gap: '8px', overflowX: 'auto', padding: '35px 20px 35px', background: '#01040a', border: `2px solid ${C.cardBorder}`, borderRadius: '8px', boxShadow: 'inset 0 0 15px rgba(0,0,0,0.8)' },
   tapeCell: (isHead) => ({
     flexShrink: 0, width: '54px', height: '58px',
@@ -170,37 +168,44 @@ const styles = {
 };
 
 export default function App() {
+  // 1. ESTADOS INICIALIZADOS DIRECTAMENTE (Ya no dependemos de un useEffect para rellenarlos)
   const [algoritmoActual, setAlgoritmoActual] = useState('suma_unaria');
   const [tapeInput, setTapeInput] = useState(ALGORITMOS.suma_unaria.inputPorDefecto);
-  const [tape, setTape] = useState([]);
-  const [headPosition, setHeadPosition] = useState(0);
-  const [currentState, setCurrentState] = useState('q0');
+  
+  // Inicializamos la cinta directamente con los '_' y el input cortado
+  const [tape, setTape] = useState(() => {
+    const t = ALGORITMOS.suma_unaria.inputPorDefecto.split('');
+    return ['_', '_', ...(t.length ? t : ['_']), '_', '_'];
+  });
+  
+  const [headPosition, setHeadPosition] = useState(2);
+  const [currentState, setCurrentState] = useState(() => ALGORITMOS.suma_unaria.transiciones[0]?.currentState || 'q0');
   const [transitions, setTransitions] = useState(ALGORITMOS.suma_unaria.transiciones);
   const [status, setStatus] = useState('idle');
   const [stepCount, setStepCount] = useState(0);
-  const [logs, setLogs] = useState([]);
-  const [lastMove, setLastMove] = useState({ dir: 'S', text: 'INICIALIZADO' });
+  const [logs, setLogs] = useState([`// SYSTEM: algoritmo [SUMA_UNARIA] cargado correctamente.`]);
+  const [lastMove, setLastMove] = useState({ dir: 'S', text: 'MÁQUINA INICIALIZADA EN POSICIÓN [2]' });
 
-  const initMachine = (inputOpcional, transicionesOpcionales, idAlgoOpcional) => {
-  const cadenaALeer = inputOpcional !== undefined ? inputOpcional : tapeInput;
-  const listaTransiciones = transicionesOpcionales !== undefined ? transicionesOpcionales : transitions;
-  const nombreAlgoritmo = idAlgoOpcional !== undefined ? idAlgoOpcional : algoritmoActual;
+  // 2. FUNCIÓN DE RE-INICIALIZACIÓN (Solo se llamará de forma reactiva en eventos de usuario)
+  const initMachine = useCallback((inputOpcional, transicionesOpcionales, idAlgoOpcional) => {
+    const cadenaALeer = inputOpcional !== undefined ? inputOpcional : tapeInput;
+    const listaTransiciones = transicionesOpcionales !== undefined ? transicionesOpcionales : transitions;
+    const nombreAlgoritmo = idAlgoOpcional !== undefined ? idAlgoOpcional : algoritmoActual;
 
-  const t = cadenaALeer.split('');
-  setTape(['_', '_', ...(t.length ? t : ['_']), '_', '_']);
-  setHeadPosition(2);
+    const t = cadenaALeer.split('');
+    setTape(['_', '_', ...(t.length ? t : ['_']), '_', '_']);
+    setHeadPosition(2);
+    
+    const estadoInicial = listaTransiciones[0]?.currentState || 'q0';
+    setCurrentState(estadoInicial);
+    setStatus('idle');
+    setStepCount(0);
+    setLastMove({ dir: 'S', text: 'MÁQUINA INICIALIZADA EN POSICIÓN [2]' });
+    setLogs([`// SYSTEM: algoritmo [${nombreAlgoritmo.toUpperCase()}] cargado correctamente.`]);
+  }, [tapeInput, transitions, algoritmoActual]);
+
+  // Se ejecuta limpiamente una sola vez al montar la aplicación
   
-  const estadoInicial = listaTransiciones[0]?.currentState || 'q0';
-  setCurrentState(estadoInicial);
-  setStatus('idle');
-  setStepCount(0);
-  setLastMove({ dir: 'S', text: 'MÁQUINA INICIALIZADA EN POSICIÓN [2]' });
-  setLogs([`// SYSTEM: algoritmo [${nombreAlgoritmo.toUpperCase()}] cargado correctamente.`]);
-  };
-
-  useEffect(() => {
-    initMachine(ALGORITMOS.suma_unaria.inputPorDefecto, ALGORITMOS.suma_unaria.transiciones, 'suma_unaria');
-  }, []);
 
   const stepExecution = () => {
     if (status === 'accepted' || status === 'rejected') return;
@@ -235,7 +240,6 @@ export default function App() {
     setCurrentState(rule.nextState);
     setStepCount(p => p + 1);
     
-    // Configurar flecha y texto descriptivo del movimiento
     const dirTexto = rule.direction === 'R' ? `DERECHA (→) de pos ${antiguaPosicion} a pos ${pos}` : rule.direction === 'L' ? `IZQUIERDA (←) de pos ${antiguaPosicion} a pos ${pos}` : `STAY (•) en pos ${pos}`;
     setLastMove({ dir: rule.direction, text: dirTexto });
 
@@ -265,32 +269,30 @@ export default function App() {
             <div style={styles.statusBadge(status)}>{status.toUpperCase()}</div>
           </header>
 
-          {/* PARTE NUEVA: DOS GLOSARIOS FORMALES */}
+          {/* DOS GLOSARIOS FORMALES */}
           <div style={styles.glossaryGrid}>
-            {/* GLOSARIO 1: ELEMENTOS DE LA MAQUINA DE TURING */}
             <div style={styles.glossaryCard}>
-              <div style={styles.sectionTitle(C.neon)}>📋 ELEMENTOS DE LA MÁQUINA DE TURING $M = \langle Q, \Sigma, \Gamma, \delta, q_0, B, F \rangle$</div>
+              <div style={styles.sectionTitle(C.neon)}>📋 ELEMENTOS DE LA MÁQUINA DE TURING M = ⟨Q, Σ, Γ, δ, q0, B, F⟩</div>
               <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>$Q$ (Conjunto Finito de Estados):</span> Todos los estados internos lógicos en los que se puede encontrar el procesador (Ej: `q0`, `busca_A`).
+                <span style={styles.glossaryTerm}>Q (Conjunto Finito de Estados):</span> Todos los estados internos lógicos en los que se puede encontrar el procesador (Ej: `q0`, `busca_A`).
               </div>
               <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>$\Sigma$ (Alfabeto de Entrada):</span> Símbolos permitidos en la cadena original que escribe el usuario antes de iniciar la computación.
+                <span style={styles.glossaryTerm}>Σ (Alfabeto de Entrada):</span> Símbolos permitidos en la cadena original que escribe el usuario antes de iniciar la computación.
               </div>
               <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>$\Gamma$ (Alfabeto de la Cinta):</span> Símbolos totales que la máquina puede escribir. Incluye a $\Sigma$ y al símbolo Blanco ($\Gamma &gt; \Sigma$).
+                <span style={styles.glossaryTerm}>Γ (Alfabeto de la Cinta):</span> Símbolos totales que la máquina puede escribir. Incluye a Σ y al símbolo Blanco (Γ &gt; Σ).
               </div>
               <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>$B$ o $\_$ (Símbolo Blanco):</span> Carácter de espacio vacío que llena la cinta hasta el infinito a la izquierda y derecha.
+                <span style={styles.glossaryTerm}>B o _ (Símbolo Blanco):</span> Carácter de espacio vacío que llena la cinta hasta el infinito a la izquierda y derecha.
               </div>
               <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>$\delta$ (Función de Transición):</span> La matriz matemática que dicta la ejecución: $\delta(q_{act}, \text{letra}) \rightarrow (q_{sig}, \text{escribe}, \text{Dirección})$.
+                <span style={styles.glossaryTerm}>δ (Función de Transición):</span> La matriz matemática que dicta la ejecución: δ(q_act, letra) → (q_sig, escribe, Dirección).
               </div>
               <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>Cabezal de Lectura/Escritura:</span> El puntero físico-lógico que se desplaza por las celdas leyendo, editando caracteres y moviéndose ($R, L, S$).
+                <span style={styles.glossaryTerm}>Cabezal de Lectura/Escritura:</span> El puntero físico-lógico que se desplaza por las celdas leyendo, editando caracteres y moviéndose (R, L, S).
               </div>
             </div>
 
-            {/* GLOSARIO 2: JERARQUÍA DE CHOMSKY */}
             <div style={styles.glossaryCard}>
               <div style={styles.sectionTitle(C.pink)}>🏛️ JERARQUÍA DE CHOMSKY (Clasificación de Lenguajes Formales)</div>
               <div style={styles.glossaryItem}>
@@ -337,7 +339,7 @@ export default function App() {
                   {ALGORITMOS[algoritmoActual].descripcion}
                 </p>
 
-                <label style={{ fontSize: '10px', color: C.textDim, display: 'block', marginBottom: '6px', letterSpacing: '1px' }}>CINTA DE ENTRADA ($\Sigma$)</label>
+                <label style={{ fontSize: '10px', color: C.textDim, display: 'block', marginBottom: '6px', letterSpacing: '1px' }}>CINTA DE ENTRADA (Σ)</label>
                 <input
                   style={styles.input}
                   type="text"
@@ -362,7 +364,7 @@ export default function App() {
             {/* PANEL DERECHO: CINTA HIGH CONTRAST Y ESTADOS */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={styles.card}>
-                <div style={styles.sectionTitle(C.textMid)}>◈ MONITOR DE TRABAJO DE CINTA FIJA ($\Gamma$)</div>
+                <div style={styles.sectionTitle(C.textMid)}>◈ MONITOR DE TRABAJO DE CINTA FIJA (Γ)</div>
                 <div style={styles.tapeWrap}>
                   {tape.map((char, i) => {
                     const isHead = i === headPosition;
@@ -383,7 +385,7 @@ export default function App() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginTop: '20px' }}>
                   <div style={{ background: '#020612', padding: '12px', borderRadius: '4px', textAlign: 'center', border: `1px solid ${C.cardBorder}` }}>
-                    <div style={{ fontSize: '9px', color: C.textDim, letterSpacing: '1px' }}>ESTADO ACTUAL ($Q$)</div>
+                    <div style={{ fontSize: '9px', color: C.textDim, letterSpacing: '1px' }}>ESTADO ACTUAL (Q)</div>
                     <div style={{ color: C.neon, fontWeight: '700', fontSize: '16px', marginTop: '4px' }}>{currentState}</div>
                   </div>
                   <div style={{ background: '#020612', padding: '12px', borderRadius: '4px', textAlign: 'center', border: `1px solid ${C.cardBorder}` }}>
@@ -399,7 +401,7 @@ export default function App() {
 
               {/* LOGS / CONSOLA */}
               <div style={styles.card}>
-                <div style={{ fontSize: '10px', color: C.textDim, marginBottom: '6px', letterSpacing: '1px' }}>CONSOLE_OUTPUT // REGISTRO DE TRABAJO $\delta$</div>
+                <div style={{ fontSize: '10px', color: C.textDim, marginBottom: '6px', letterSpacing: '1px' }}>CONSOLE_OUTPUT // REGISTRO DE TRABAJO δ</div>
                 <div style={{ background: '#01050f', padding: '12px', height: '130px', overflowY: 'auto', fontSize: '12px', borderRadius: '4px', border: `1px solid ${C.cardBorder}` }}>
                   {logs.map((l, idx) => <div key={idx} style={{ padding: '2px 0', color: l.includes('COMPLETADA')? C.green : l.includes('ERR')? C.pink : C.textMid, fontFamily: 'monospace' }}>{l}</div>)}
                 </div>
@@ -411,13 +413,13 @@ export default function App() {
         </div>
       </div>
       
-      {/* Estilos inyectados directos para animaciones del neón */}
-      <style>{`
+      {/* Estilos inyectados seguros compatibles con las estrictas reglas de React */}
+      <style dangerouslySetInnerHTML={{__html: `
         @keyframes bounce {
           from { transform: translateY(0); }
           to { transform: translateY(4px); }
         }
-      `}</style>
+      `}} />
     </>
   );
 }
