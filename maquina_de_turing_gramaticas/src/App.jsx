@@ -194,7 +194,9 @@ export default function App() {
     const listaTransiciones = transicionesOpcionales !== undefined ? transicionesOpcionales : transitions;
     const nombreAlgoritmo = idAlgoOpcional !== undefined ? idAlgoOpcional : algoritmoActual;
 
-    const t = cadenaALeer.split('');
+    // 🌟 LA REPARACIÓN: Convertimos la cadena a mayúsculas antes de romperla en caracteres
+    const t = cadenaALeer.toUpperCase().split(''); 
+    
     setTape(['_', '_', ...(t.length ? t : ['_']), '_', '_']);
     setHeadPosition(2);
     
