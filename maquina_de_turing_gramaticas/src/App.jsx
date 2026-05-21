@@ -137,7 +137,7 @@ const styles = {
   glossaryTerm: { color: C.neon, fontWeight: '700' },
   chomskyTerm: { color: C.pink, fontWeight: '700' },
 
-  grid: { display: 'grid', gridTemplateColumns: '380px 1fr', gap: '24px' },
+  grid: { display: 'grid', gridTemplateColumns: '380px 1fr', gap: '24px', marginBottom: '24px' },
   card: { background: C.card, border: `1px solid ${C.cardBorder}`, borderRadius: '8px', padding: '20px', position: 'relative', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' },
   sectionTitle: (color = C.neon) => ({ fontSize: '12px', fontWeight: '700', color, letterSpacing: '2px', marginBottom: '16px', textTransform: 'uppercase' }),
   input: { width: '100%', background: '#020612', border: `1px solid ${C.cardBorder}`, borderRadius: '4px', padding: '10px 12px', color: C.green, fontFamily: 'inherit', fontSize: '14px', outline: 'none', boxSizing: 'border-box' },
@@ -160,19 +160,21 @@ const styles = {
   directionIndicator: (dir) => ({
     position: 'absolute', bottom: '-28px', fontSize: '16px', fontWeight: '900',
     color: dir === 'R' ? C.green : dir === 'L' ? C.neon : C.amber,
-    animation: 'bounce 0.6s infinite alternate',
     textShadow: `0 0 8px ${dir === 'R' ? C.green : dir === 'L' ? C.neon : C.amber}`
   }),
 
-  statusBadge: (status) => ({ padding: '6px 16px', borderRadius: '4px', fontSize: '12px', border: `2px solid ${status === 'accepted' ? C.green : status === 'rejected' ? C.pink : C.neon}`, color: status === 'accepted' ? C.green : status === 'rejected' ? C.pink : C.neon, fontWeight: '800', textShadow: `0 0 5px ${status==='accepted'?C.green:C.pink}` })
+  statusBadge: (status) => ({ padding: '6px 16px', borderRadius: '4px', fontSize: '12px', border: `2px solid ${status === 'accepted' ? C.green : status === 'rejected' ? C.pink : C.neon}`, color: status === 'accepted' ? C.green : status === 'rejected' ? C.pink : C.neon, fontWeight: '800', textShadow: `0 0 5px ${status==='accepted'?C.green:C.pink}` }),
+  
+  // Tabla Formal Estilo Grande
+  table: { width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px', marginTop: '10px' },
+  th: { borderBottom: `2px solid ${C.cardBorder}`, padding: '12px 16px', color: C.neon, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' },
+  td: { padding: '12px 16px', borderBottom: `1px solid #041021`, fontFamily: 'monospace' }
 };
 
 export default function App() {
-  // 1. ESTADOS INICIALIZADOS DIRECTAMENTE (Ya no dependemos de un useEffect para rellenarlos)
   const [algoritmoActual, setAlgoritmoActual] = useState('suma_unaria');
   const [tapeInput, setTapeInput] = useState(ALGORITMOS.suma_unaria.inputPorDefecto);
   
-  // Inicializamos la cinta directamente con los '_' y el input cortado
   const [tape, setTape] = useState(() => {
     const t = ALGORITMOS.suma_unaria.inputPorDefecto.split('');
     return ['_', '_', ...(t.length ? t : ['_']), '_', '_'];
@@ -185,8 +187,8 @@ export default function App() {
   const [stepCount, setStepCount] = useState(0);
   const [logs, setLogs] = useState([`// SYSTEM: algoritmo [SUMA_UNARIA] cargado correctamente.`]);
   const [lastMove, setLastMove] = useState({ dir: 'S', text: 'MÁQUINA INICIALIZADA EN POSICIÓN [2]' });
+  const [activeRuleIdx, setActiveRuleIdx] = useState(-1); // Rastrea cuál regla de la tabla se está aplicando justo ahora
 
-  // 2. FUNCIÓN DE RE-INICIALIZACIÓN (Solo se llamará de forma reactiva en eventos de usuario)
   const initMachine = useCallback((inputOpcional, transicionesOpcionales, idAlgoOpcional) => {
     const cadenaALeer = inputOpcional !== undefined ? inputOpcional : tapeInput;
     const listaTransiciones = transicionesOpcionales !== undefined ? transicionesOpcionales : transitions;
@@ -200,28 +202,30 @@ export default function App() {
     setCurrentState(estadoInicial);
     setStatus('idle');
     setStepCount(0);
+    setActiveRuleIdx(-1);
     setLastMove({ dir: 'S', text: 'MÁQUINA INICIALIZADA EN POSICIÓN [2]' });
     setLogs([`// SYSTEM: algoritmo [${nombreAlgoritmo.toUpperCase()}] cargado correctamente.`]);
   }, [tapeInput, transitions, algoritmoActual]);
-
-  // Se ejecuta limpiamente una sola vez al montar la aplicación
-  
 
   const stepExecution = () => {
     if (status === 'accepted' || status === 'rejected') return;
     const currentChar = tape[headPosition] || '_';
     
-    let rule = transitions.find(t => t.currentState === currentState && t.readChar === currentChar);
-    if (!rule) {
-      rule = transitions.find(t => t.currentState === currentState && t.readChar === '*');
+    let ruleIdx = transitions.findIndex(t => t.currentState === currentState && t.readChar === currentChar);
+    if (ruleIdx === -1) {
+      ruleIdx = transitions.findIndex(t => t.currentState === currentState && t.readChar === '*');
     }
 
-    if (!rule) {
+    if (ruleIdx === -1) {
       setStatus('rejected');
+      setActiveRuleIdx(-1);
       setLastMove({ dir: 'S', text: '🛑 ERROR: SIN TRANSICIÓN' });
       setLogs(p => [`// ERR: Detención abrupta. Sin transiciones para δ(${currentState}, '${currentChar}')`, ...p]);
       return;
     }
+
+    const rule = transitions[ruleIdx];
+    setActiveRuleIdx(ruleIdx); // Encendemos la fila correspondiente en la tabla grande
 
     const newTape = [...tape];
     const charAQuedar = rule.writeChar === '*' ? currentChar : rule.writeChar;
@@ -274,43 +278,28 @@ export default function App() {
             <div style={styles.glossaryCard}>
               <div style={styles.sectionTitle(C.neon)}>📋 ELEMENTOS DE LA MÁQUINA DE TURING M = ⟨Q, Σ, Γ, δ, q0, B, F⟩</div>
               <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>Q (Conjunto Finito de Estados):</span> Todos los estados internos lógicos en los que se puede encontrar el procesador (Ej: `q0`, `busca_A`).
-              </div>
-              <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>Σ (Alfabeto de Entrada):</span> Símbolos permitidos en la cadena original que escribe el usuario antes de iniciar la computación.
-              </div>
-              <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>Γ (Alfabeto de la Cinta):</span> Símbolos totales que la máquina puede escribir. Incluye a Σ y al símbolo Blanco (Γ &gt; Σ).
-              </div>
-              <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>B o _ (Símbolo Blanco):</span> Carácter de espacio vacío que llena la cinta hasta el infinito a la izquierda y derecha.
+                <span style={styles.glossaryTerm}>Q (Conjunto Finito de Estados):</span> Todos los estados internos lógicos en los que se puede encontrar el procesador.
               </div>
               <div style={styles.glossaryItem}>
                 <span style={styles.glossaryTerm}>δ (Función de Transición):</span> La matriz matemática que dicta la ejecución: δ(q_act, letra) → (q_sig, escribe, Dirección).
               </div>
               <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>Cabezal de Lectura/Escritura:</span> El puntero físico-lógico que se desplaza por las celdas leyendo, editando caracteres y moviéndose (R, L, S).
+                <span style={styles.glossaryTerm}>B o _ (Símbolo Blanco):</span> Carácter de espacio vacío que llena la cinta hasta el infinito.
               </div>
             </div>
 
             <div style={styles.glossaryCard}>
-              <div style={styles.sectionTitle(C.pink)}>🏛️ JERARQUÍA DE CHOMSKY (Clasificación de Lenguajes Formales)</div>
+              <div style={styles.sectionTitle(C.pink)}>🏛️ JERARQUÍA DE CHOMSKY</div>
               <div style={styles.glossaryItem}>
-                <span style={styles.chomskyTerm}>Tipo 0 (Gramáticas No Restringidas):</span> Reconocidas por las **Máquinas de Turing**. Son el tope de poder de cómputo; procesan cualquier lenguaje computable recursivamente enumerable.
+                <span style={styles.chomskyTerm}>Tipo 0 (Gramáticas No Restringidas):</span> Reconocidas por las **Máquinas de Turing**. Son el tope de poder de cómputo universal.
               </div>
               <div style={styles.glossaryItem}>
-                <span style={styles.chomskyTerm}>Tipo 1 (Gramáticas Sensibles al Contexto):</span> Reconocidas por **Autómatas Linealmente Acotados**. El tamaño de la memoria de trabajo está limitado por la longitud de la entrada.
-              </div>
-              <div style={styles.glossaryItem}>
-                <span style={styles.chomskyTerm}>Tipo 2 (Gramáticas Libres de Contexto):</span> Reconocidas por **Autómatas de Pila (PDA)**. Utilizan estructuras de tipo LIFO (pilas) para procesar anidaciones, como los paréntesis balanceados.
-              </div>
-              <div style={styles.glossaryItem}>
-                <span style={styles.chomskyTerm}>Tipo 3 (Gramáticas Regulares):</span> Reconocidas por **Autómatas Finitos (AFD / AFND)**. Son las más simples (Ej: expresiones regulares). No tienen memoria a largo plazo ni cintas.
+                <span style={styles.chomskyTerm}>Tipo 2 (Gramáticas Libres de Contexto):</span> Reconocidas por Autómatas de Pila (PDA), como los paréntesis balanceados.
               </div>
             </div>
           </div>
 
-          {/* INTERFAZ PRINCIPAL DE TRABAJO */}
+          {/* INTERFAZ PRINCIPAL EN DOS COLUMNAS */}
           <div style={styles.grid}>
             
             {/* PANEL IZQUIERDO DE CONTROL */}
@@ -353,15 +342,15 @@ export default function App() {
                   <button style={styles.btnSecondary} onClick={() => initMachine()}>↺ RESET</button>
                 </div>
               </div>
-
-              {/* RECUADRO DE MOVIMIENTO REALZADO */}
-              <div style={{...styles.card, borderLeft: `4px solid ${C.amber}`}}>
-                <div style={styles.sectionTitle(C.amber)}>📍 RASTREADOR DE DIRECCIÓN</div>
-                <div style={{fontSize: '13px', fontWeight: 'bold', color: '#fff'}}>{lastMove.text}</div>
+              
+              {/* MINI RASTREADOR REUBICADO */}
+              <div style={{...styles.card, padding: '12px 20px', borderLeft: `3px solid ${C.amber}`}}>
+                <div style={{fontSize: '9px', color: C.textDim, letterSpacing: '1px'}}>ÚLTIMO MOVIMIENTO CABEZAL</div>
+                <div style={{fontSize: '11px', fontWeight: 'bold', color: '#fff', marginTop: '2px'}}>{lastMove.text}</div>
               </div>
             </div>
 
-            {/* PANEL DERECHO: CINTA HIGH CONTRAST Y ESTADOS */}
+            {/* PANEL DERECHO: MONITOR DE CINTA Y CONSOLA */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={styles.card}>
                 <div style={styles.sectionTitle(C.textMid)}>◈ MONITOR DE TRABAJO DE CINTA FIJA (Γ)</div>
@@ -402,11 +391,57 @@ export default function App() {
               {/* LOGS / CONSOLA */}
               <div style={styles.card}>
                 <div style={{ fontSize: '10px', color: C.textDim, marginBottom: '6px', letterSpacing: '1px' }}>CONSOLE_OUTPUT // REGISTRO DE TRABAJO δ</div>
-                <div style={{ background: '#01050f', padding: '12px', height: '130px', overflowY: 'auto', fontSize: '12px', borderRadius: '4px', border: `1px solid ${C.cardBorder}` }}>
+                <div style={{ background: '#01050f', padding: '12px', height: '110px', overflowY: 'auto', fontSize: '12px', borderRadius: '4px', border: `1px solid ${C.cardBorder}` }}>
                   {logs.map((l, idx) => <div key={idx} style={{ padding: '2px 0', color: l.includes('COMPLETADA')? C.green : l.includes('ERR')? C.pink : C.textMid, fontFamily: 'monospace' }}>{l}</div>)}
                 </div>
               </div>
+            </div>
+          </div>
 
+          {/* NUEVO PANEL EXTENDIDO GIGANTE: TABLA DE TRANSICIONES FORMAL (δ) */}
+          <div style={styles.card}>
+            <div style={styles.sectionTitle(C.green)}>💻 MATRIZ FORMAL DE LA FUNCIÓN DE TRANSICIÓN δ (ALGORITMO ACTUAL)</div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={styles.th}>Fila</th>
+                    <th style={styles.th}>Estado Origen (Q)</th>
+                    <th style={styles.th}>Carácter Leído (Γ)</th>
+                    <th style={styles.th}>Estado Destino (Q)</th>
+                    <th style={styles.th}>Carácter Escrito (Γ)</th>
+                    <th style={styles.th}>Dirección Cabezal</th>
+                    <th style={styles.th}>Estado Operación</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transitions.map((t, idx) => {
+                    const isRowActive = idx === activeRuleIdx;
+                    return (
+                      <tr 
+                        key={idx} 
+                        style={{ 
+                          background: isRowActive ? `${C.green}15` : 'transparent',
+                          transition: 'background 0.2s ease',
+                          color: isRowActive ? C.green : C.text
+                        }}
+                      >
+                        <td style={{...styles.td, color: isRowActive ? C.green : C.textDim}}>[{idx}]</td>
+                        <td style={{...styles.td, fontWeight: isRowActive ? '900' : '400'}}>{t.currentState}</td>
+                        <td style={{...styles.td, color: isRowActive ? C.green : C.amber, fontWeight: 'bold'}}>{t.readChar === '_' ? 'B (Blanco)' : t.readChar}</td>
+                        <td style={{...styles.td}}>{t.nextState}</td>
+                        <td style={{...styles.td, color: isRowActive ? C.green : C.pink}}>{t.writeChar === '_' ? 'B (Blanco)' : t.writeChar === '*' ? 'Mismo' : t.writeChar}</td>
+                        <td style={{...styles.td, fontWeight: 'bold'}}>
+                          {t.direction === 'R' ? 'DERECHA (→)' : t.direction === 'L' ? 'IZQUIERDA (←)' : 'STAY (•)'}
+                        </td>
+                        <td style={{...styles.td, fontSize: '11px', color: isRowActive ? C.green : C.textDim}}>
+                          {isRowActive ? '⚡ EJECUTANDO' : '⚪ EN ESPERA'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -420,28 +455,22 @@ export default function App() {
           to { transform: translateY(4px); }
         }
 
-        /* 1. Estilo para navegadores basados en Chromium (Chrome, Edge, Brave, Opera) */
         ::-webkit-scrollbar {
-          width: 6px;               /* Ancho de la barra vertical */
-          height: 6px;              /* Alto de la barra horizontal */
+          width: 6px;
+          height: 6px;
         }
-        
         ::-webkit-scrollbar-track {
-          background: #01040a;      /* Fondo de la barra igual al contenedor oscuro */
+          background: #01040a;
           border-radius: 4px;
         }
-        
         ::-webkit-scrollbar-thumb {
-          background: #00ffff33;    /* Barra color azul neón transparente */
-          border: 1px solid #00ffff;/* Borde neón brillante */
+          background: #00ffff33;
+          border: 1px solid #00ffff;
           border-radius: 4px;
         }
-
         ::-webkit-scrollbar-thumb:hover {
-          background: #00ffff66;    /* Brilla más al pasar el mouse por encima */
+          background: #00ffff66;
         }
-
-        /* 2. Estilo estándar para Firefox */
         * {
           scrollbar-width: thin;
           scrollbar-color: #00ffff33 #01040a;
