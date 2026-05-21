@@ -73,23 +73,24 @@ const ALGORITMOS = {
     ]
   },
   el_palindromo: {
-    nombre: "🔄 DETECTOR DE PALÍNDROMOS",
-    descripcion: "Compara los extremos de la palabra uno a uno (eliminándolos) para comprobar si es capicúa.",
-    inputPorDefecto: "ABBA",
+    nombre: "🔄 DETECTOR DE PALÍNDROMOS UNIVERSAL",
+    descripcion: "Compara los extremos de la palabra uno a uno eliminándolos. ¡Soporta cualquier letra del alfabeto (A-Z) de forma dinámica!",
+    inputPorDefecto: "RECONOCER",
     transiciones: [
-      { currentState: 'q0', readChar: 'A', nextState: 'busca_A', writeChar: '_', direction: 'R' },
-      { currentState: 'q0', readChar: 'B', nextState: 'busca_B', writeChar: '_', direction: 'R' },
+      // 1. Lee el extremo izquierdo, lo borra (_) y salta a buscar su pareja al final
+      { currentState: 'q0', readChar: 'DINAMICO', nextState: 'busca_$', writeChar: '_', direction: 'R' },
       { currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
-      { currentState: 'busca_A', readChar: 'A', nextState: 'busca_A', writeChar: 'A', direction: 'R' },
-      { currentState: 'busca_A', readChar: 'B', nextState: 'busca_A', writeChar: 'B', direction: 'R' },
-      { currentState: 'busca_A', readChar: '_', nextState: 'compara_A', writeChar: '_', direction: 'L' },
-      { currentState: 'busca_B', readChar: 'A', nextState: 'busca_B', writeChar: 'A', direction: 'R' },
-      { currentState: 'busca_B', readChar: 'B', nextState: 'busca_B', writeChar: 'B', direction: 'R' },
-      { currentState: 'busca_B', readChar: '_', nextState: 'compara_B', writeChar: '_', direction: 'L' },
-      { currentState: 'compara_A', readChar: 'A', nextState: 'retorno', writeChar: '_', direction: 'L' },
-      { currentState: 'compara_B', readChar: 'B', nextState: 'retorno', writeChar: '_', direction: 'L' },
-      { currentState: 'retorno', readChar: 'A', nextState: 'retorno', writeChar: 'A', direction: 'L' },
-      { currentState: 'retorno', readChar: 'B', nextState: 'retorno', writeChar: 'B', direction: 'L' },
+
+      // 2. Viaja a la derecha saltando cualquier letra hasta encontrar el espacio blanco
+      { currentState: 'busca_$', readChar: 'DINAMICO', nextState: 'busca_$', writeChar: '*', direction: 'R' },
+      { currentState: 'busca_$', readChar: '_', nextState: 'compara_$', writeChar: '_', direction: 'L' },
+
+      // 3. Compara si la letra del extremo derecho coincide con la guardada. Si sí, la borra
+      { currentState: 'compara_$', readChar: '$', nextState: 'retorno', writeChar: '_', direction: 'L' },
+      { currentState: 'compara_$', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' }, // Caso longitud impar
+
+      // 4. Viaja a la izquierda saltando cualquier letra hasta el inicio para volver a empezar
+      { currentState: 'retorno', readChar: 'DINAMICO', nextState: 'retorno', writeChar: '*', direction: 'L' },
       { currentState: 'retorno', readChar: '_', nextState: 'q0', writeChar: '_', direction: 'R' }
     ]
   },
@@ -213,7 +214,23 @@ export default function App() {
     if (status === 'accepted' || status === 'rejected') return;
     const currentChar = tape[headPosition] || '_';
     
-    let ruleIdx = transitions.findIndex(t => t.currentState === currentState && t.readChar === currentChar);
+    // --- 🌟 EL TRUCO DE LA VARIABLE DINÁMICA ---
+    // 1. Si estamos buscando o comparando, extraemos qué letra guardamos en el estado actual
+    let letraGuardada = null;
+    if (currentState.includes('_') && !currentState.endsWith('_')) {
+      letraGuardada = currentState.split('_')[1]; // Ej: de "busca_Z" extrae "Z"
+    }
+
+    // 2. Buscamos una regla exacta o genérica
+    let ruleIdx = transitions.findIndex(t => {
+      // Reemplazamos el comodín $ por la letra real que tiene la máquina en memoria
+      const tState = t.currentState.replace('$', letraGuardada);
+      const tRead = t.readChar === '$' ? letraGuardada : t.readChar;
+      
+      return tState === currentState && 
+             (tRead === currentChar || tRead === 'DINAMICO' && currentChar !== '_');
+    });
+
     if (ruleIdx === -1) {
       ruleIdx = transitions.findIndex(t => t.currentState === currentState && t.readChar === '*');
     }
@@ -227,7 +244,16 @@ export default function App() {
     }
 
     const rule = transitions[ruleIdx];
-    setActiveRuleIdx(ruleIdx); // Encendemos la fila correspondiente en la tabla grande
+    setActiveRuleIdx(ruleIdx);
+
+    // 3. Al transicionar, si el próximo estado tiene $, lo cambiamos por la letra leída actual
+    let nextStateDinamico = rule.nextState;
+    if (rule.nextState.includes('$')) {
+      // Si venimos de q0, la letra guardada es la que acabamos de leer
+      const letraAFormatear = letraGuardada || currentChar;
+      nextStateDinamico = rule.nextState.replace('$', letraAFormatear);
+    }
+    // ---------------------------------------------
 
     const newTape = [...tape];
     const charAQuedar = rule.writeChar === '*' ? currentChar : rule.writeChar;
@@ -243,18 +269,18 @@ export default function App() {
 
     setTape(newTape);
     setHeadPosition(pos);
-    setCurrentState(rule.nextState);
+    setCurrentState(nextStateDinamico); // 🌟 Usamos el estado dinámico procesado
     setStepCount(p => p + 1);
     
     const dirTexto = rule.direction === 'R' ? `DERECHA (→) de pos ${antiguaPosicion} a pos ${pos}` : rule.direction === 'L' ? `IZQUIERDA (←) de pos ${antiguaPosicion} a pos ${pos}` : `STAY (•) en pos ${pos}`;
     setLastMove({ dir: rule.direction, text: dirTexto });
 
-    setLogs(p => [`// PASO ${stepCount + 1}: δ(${currentState},'${currentChar}') → (${rule.nextState},'${charAQuedar}',${rule.direction})`, ...p]);
+    setLogs(p => [`// PASO ${stepCount + 1}: δ(${currentState},'${currentChar}') → (${nextStateDinamico},'${charAQuedar}',${rule.direction})`, ...p]);
 
-    if (rule.nextState.toLowerCase().includes('accept')) {
+    if (nextStateDinamico.toLowerCase().includes('accept')) {
       setStatus('accepted');
       setLogs(p => ['// COMPUTACIÓN COMPLETADA: Cadena aceptada y validada con éxito ✓', ...p]);
-    } else if (rule.nextState.toLowerCase().includes('reject')) {
+    } else if (nextStateDinamico.toLowerCase().includes('reject')) {
       setStatus('rejected');
       setLogs(p => ['// COMPUTACIÓN FALLIDA: La cadena entró en estado de rechazo ✗', ...p]);
     }
