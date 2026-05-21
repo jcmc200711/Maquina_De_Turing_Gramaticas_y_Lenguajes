@@ -413,11 +413,38 @@ export default function App() {
         </div>
       </div>
       
-      {/* Estilos inyectados seguros compatibles con las estrictas reglas de React */}
+      {/* Estilos inyectados seguros con soporte para scrollbars neón */}
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes bounce {
           from { transform: translateY(0); }
           to { transform: translateY(4px); }
+        }
+
+        /* 1. Estilo para navegadores basados en Chromium (Chrome, Edge, Brave, Opera) */
+        ::-webkit-scrollbar {
+          width: 6px;               /* Ancho de la barra vertical */
+          height: 6px;              /* Alto de la barra horizontal */
+        }
+        
+        ::-webkit-scrollbar-track {
+          background: #01040a;      /* Fondo de la barra igual al contenedor oscuro */
+          border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+          background: #00ffff33;    /* Barra color azul neón transparente */
+          border: 1px solid #00ffff;/* Borde neón brillante */
+          border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+          background: #00ffff66;    /* Brilla más al pasar el mouse por encima */
+        }
+
+        /* 2. Estilo estándar para Firefox */
+        * {
+          scrollbar-width: thin;
+          scrollbar-color: #00ffff33 #01040a;
         }
       `}} />
     </>
