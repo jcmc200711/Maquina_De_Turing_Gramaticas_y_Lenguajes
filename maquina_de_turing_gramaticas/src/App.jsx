@@ -54,7 +54,7 @@ const styles = {
   header: {
     borderBottom: `1px solid ${C.cardBorder}`,
     paddingBottom: '20px',
-    marginBottom: '28px',
+    marginBottom: '20px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
@@ -77,6 +77,27 @@ const styles = {
     letterSpacing: '3px',
     marginTop: '4px',
   },
+  glossaryCard: {
+    background: `${C.card}80`,
+    border: `1px solid ${C.cardBorder}`,
+    borderRadius: '8px',
+    padding: '16px',
+    marginBottom: '24px',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+    gap: '16px',
+  },
+  glossaryItem: {
+    fontSize: '11px',
+    lineHeight: '1.5',
+  },
+  glossaryTerm: {
+    color: C.neon,
+    fontWeight: '700',
+    display: 'block',
+    marginBottom: '4px',
+    letterSpacing: '1px',
+  },
   statusBadge: (status) => ({
     padding: '6px 14px',
     borderRadius: '4px',
@@ -98,7 +119,7 @@ const styles = {
   }),
   grid: {
     display: 'grid',
-    gridTemplateColumns: '320px 1fr',
+    gridTemplateColumns: '340px 1fr',
     gap: '20px',
     alignItems: 'start',
   },
@@ -296,9 +317,11 @@ const styles = {
     marginBottom: '4px',
   },
   statValue: (color) => ({
-    fontSize: '20px',
+    fontSize: '18px',
     fontWeight: '700',
     color,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   }),
   logBox: {
     background: '#020810',
@@ -319,11 +342,6 @@ const styles = {
     paddingBottom: '6px',
     marginBottom: '8px',
   },
-  divider: {
-    border: 'none',
-    borderTop: `1px solid ${C.cardBorder}`,
-    margin: '16px 0',
-  },
 };
 
 export default function App() {
@@ -336,46 +354,72 @@ export default function App() {
   const [stepCount, setStepCount] = useState(0);
   const [logs, setLogs] = useState([]);
   const [newRule, setNewRule] = useState({ currentState: '', readChar: '', nextState: '', writeChar: '', direction: 'R' });
-  const [hoveredBtn, setHoveredBtn] = useState(null);
+
+  // Obtiene dinámicamente todos los estados registrados en la tabla
+  const statesInvolved = Array.from(new Set([
+    ...transitions.map(t => t.currentState),
+    ...transitions.map(t => t.nextState),
+  ])).sort((a, b) => {
+    if (a.includes('accept')) return 1;
+    if (b.includes('accept')) return -1;
+    return a.localeCompare(b);
+  });
 
   const initMachine = () => {
     const t = tapeInput.split('');
     if (!t.length) t.push('_');
+    // Agrega márgenes vacíos a los extremos
     setTape(['_', '_', ...t, '_', '_']);
     setHeadPosition(2);
-    setCurrentState('q0');
+    
+    // Encuentra dinámicamente cuál es el primer estado del set de transiciones
+    const initialDescoped = transitions[0]?.currentState || 'q0';
+    setCurrentState(initialDescoped);
+    
     setStatus('idle');
     setStepCount(0);
-    setLogs(['// INIT: máquina cargada — estado q0']);
+    setLogs([`// INIT: máquina cargada — estado inicial: ${initialDescoped}`]);
   };
 
-  useEffect(() => { initMachine(); }, [tapeInput]);
+  useEffect(() => { initMachine(); }, [tapeInput, transitions]);
 
   const stepExecution = () => {
     if (status === 'accepted' || status === 'rejected') return;
     const currentChar = tape[headPosition] || '_';
     const rule = transitions.find(t => t.currentState === currentState && t.readChar === currentChar);
+    
     if (!rule) {
       setStatus('rejected');
       setLogs(p => [`// ERR: sin transición δ(${currentState}, '${currentChar}')`, ...p]);
       return;
     }
+    
     const newTape = [...tape];
     newTape[headPosition] = rule.writeChar;
     let pos = headPosition;
+    
     if (rule.direction === 'R') pos++;
     if (rule.direction === 'L') pos--;
-    if (pos < 0) { newTape.unshift('_'); pos = 0; }
-    if (pos >= newTape.length) newTape.push('_');
+    
+    // Crecimiento infinito dinámico de la cinta
+    if (pos < 0) { 
+      newTape.unshift('_'); 
+      pos = 0; 
+    }
+    if (pos >= newTape.length) {
+      newTape.push('_');
+    }
+    
     setTape(newTape);
     setHeadPosition(pos);
     setCurrentState(rule.nextState);
     setStepCount(p => p + 1);
     setLogs(p => [`// STEP ${stepCount + 1}: δ(${currentState},'${currentChar}') → (${rule.nextState},'${rule.writeChar}',${rule.direction})`, ...p]);
-    if (rule.nextState.includes('accept')) {
+    
+    if (rule.nextState.toLowerCase().includes('accept')) {
       setStatus('accepted');
       setLogs(p => ['// OK: estado de aceptación alcanzado ✓', ...p]);
-    } else if (rule.nextState.includes('reject')) {
+    } else if (rule.nextState.toLowerCase().includes('reject')) {
       setStatus('rejected');
       setLogs(p => ['// FAIL: estado de rechazo alcanzado ✗', ...p]);
     }
@@ -387,11 +431,6 @@ export default function App() {
     setTransitions([...transitions, newRule]);
     setNewRule({ currentState: '', readChar: '', nextState: '', writeChar: '', direction: 'R' });
   };
-
-  const statesInvolved = Array.from(new Set([
-    ...transitions.map(t => t.currentState),
-    ...transitions.map(t => t.nextState),
-  ]));
 
   const totalStates = statesInvolved.length;
   const svgW = Math.max(600, totalStates * 140);
@@ -424,7 +463,7 @@ export default function App() {
           <header style={styles.header}>
             <div>
               <h1 style={styles.headerTitle}>TURING_MACHINE // OS v2.6</h1>
-              <p style={styles.headerSub}>SISTEMA COMPLETO DE PROCESAMIENTO Y GENERACIÓN DE AUTÓMATAS</p>
+              <p style={styles.headerSub}>SISTEMA UNIVERSAL DE COMPUTABILIDAD Y SIMULACIÓN AUTOMÁTICA</p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ fontSize: '10px', color: C.textDim, letterSpacing: '2px' }}>ESTADO GLOBAL</span>
@@ -434,6 +473,26 @@ export default function App() {
               </div>
             </div>
           </header>
+
+          {/* GLOSARIO DE LA MÁQUINA DE TURING */}
+          <section style={styles.glossaryCard}>
+            <div style={styles.glossaryItem}>
+              <span style={styles.glossaryTerm}>[ Σ ] ALFABETO DE ENTRADA</span>
+              <p style={{ color: C.textMid }}>Conjunto de caracteres admitidos en el Input original. Ahora acepta letras, números y símbolos libres.</p>
+            </div>
+            <div style={styles.glossaryItem}>
+              <span style={styles.glossaryTerm}>[ Γ ] ALFABETO DE CINTA</span>
+              <p style={{ color: C.textMid }}>Caracteres que la máquina lee/escribe. Incluye el símbolo especial <b style={{ color: C.amber }}>_</b> (Blanco / Vacío).</p>
+            </div>
+            <div style={styles.glossaryItem}>
+              <span style={styles.glossaryTerm}>[ Q ] CONJUNTO DE ESTADOS</span>
+              <p style={{ color: C.textMid }}>Estados lógicos configurados (Ej: q0, q1). El sistema auto-detecta las iniciales basadas en tu tabla.</p>
+            </div>
+            <div style={styles.glossaryItem}>
+              <span style={styles.glossaryTerm}>[ δ ] FUNCIÓN DE TRANSICIÓN</span>
+              <p style={{ color: C.textMid }}>Mapeo de ejecución: <br/><b style={{ color: C.green }}>(Q_actual, Lee) → (Q_sig, Escribe, DIR)</b> donde DIR = R (Derecha), L (Izquierda), S (Quieto).</p>
+            </div>
+          </section>
 
           {/* MAIN GRID */}
           <div style={styles.grid}>
@@ -448,14 +507,15 @@ export default function App() {
                   <span style={{ color: C.amber }}>⚡</span> CONFIGURACIÓN DE ENTRADA
                 </div>
 
-                <label style={styles.label}>CINTA INICIAL (INPUT)</label>
+                <label style={styles.label}>CINTA INICIAL (SOPORTA CUALQUER ALFABETO)</label>
                 <input
                   className="tape-input"
                   style={styles.input}
                   type="text"
                   value={tapeInput}
-                  onChange={e => setTapeInput(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
-                  placeholder="ej: 1011"
+                  // Modificado para aceptar CUALQUIER tipo de caracteres (Removida la restricción estricta de binario)
+                  onChange={e => setTapeInput(e.target.value)}
+                  placeholder="ej: cualquier_alfabeto_o_1011"
                   disabled={status !== 'idle' && status !== 'paused'}
                 />
 
@@ -581,7 +641,7 @@ export default function App() {
                   <div style={styles.sectionTitle(C.textMid)}>
                     <span style={{ color: C.neon }}>◈</span> CINTA DE MEMORIA
                   </div>
-                  <span style={{ fontSize: '9px', color: C.textDim, letterSpacing: '2px' }}>SISTEMA_CINTA_v1</span>
+                  <span style={{ fontSize: '9px', color: C.textDim, letterSpacing: '2px' }}>SISTEMA_CINTA_v2</span>
                 </div>
 
                 <div style={styles.tapeWrap}>
@@ -682,7 +742,7 @@ export default function App() {
                     {statesInvolved.map((state, idx) => {
                       const x = 80 + idx * 140, y = 110;
                       const isCurrent = state === currentState;
-                      const isAccept = state.includes('accept');
+                      const isAccept = state.toLowerCase().includes('accept');
                       return (
                         <g key={state} transform={`translate(${x},${y})`}>
                           {isAccept && <circle r="27" fill="none" stroke={C.green} strokeWidth="1" opacity="0.5" />}
@@ -723,7 +783,7 @@ export default function App() {
           </div>
 
           <footer style={{ marginTop: '24px', paddingTop: '16px', borderTop: `1px solid ${C.cardBorder}`, textAlign: 'center', fontSize: '9px', color: C.textDim, letterSpacing: '3px' }}>
-            PROCESADOR CUÁNTICO DE TURING — ENTORNO DE SIMULACIÓN REACT // {new Date().getFullYear()}
+            UNIVERSAL TURING SIMULATOR — REACT ENVIRONMENT // {new Date().getFullYear()}
           </footer>
         </div>
       </div>
