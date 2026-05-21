@@ -182,20 +182,20 @@ export default function App() {
   const [lastMove, setLastMove] = useState({ dir: 'S', text: 'INICIALIZADO' });
 
   const initMachine = (inputOpcional, transicionesOpcionales, idAlgoOpcional) => {
-    const cadenaALeer = inputOpcional !== undefined ? inputOpcional : tapeInput;
-    const listaTransiciones = transicionesOpcionales !== undefined ? transicionesOpcionales : transitions;
-    const nombreAlgo = idAlgoOpcional !== undefined ? idAlgoOpcional : algoritmoActual;
+  const cadenaALeer = inputOpcional !== undefined ? inputOpcional : tapeInput;
+  const listaTransiciones = transicionesOpcionales !== undefined ? transicionesOpcionales : transitions;
+  const nombreAlgoritmo = idAlgoOpcional !== undefined ? idAlgoOpcional : algoritmoActual;
 
-    const t = cadenaALeer.split('');
-    setTape(['_', '_', ...(t.length ? t : ['_']), '_', '_']);
-    setHeadPosition(2);
-    
-    const estadoInicial = listaTransiciones[0]?.currentState || 'q0';
-    setCurrentState(estadoInicial);
-    setStatus('idle');
-    setStepCount(0);
-    setLastMove({ dir: 'S', text: 'MÁQUINA INICIALIZADA EN POSICIÓN [2]' });
-    setLogs([`// SYSTEM: algoritmo [${nombreAlgo.toUpperCase()}] cargado correctamente.`]);
+  const t = cadenaALeer.split('');
+  setTape(['_', '_', ...(t.length ? t : ['_']), '_', '_']);
+  setHeadPosition(2);
+  
+  const estadoInicial = listaTransiciones[0]?.currentState || 'q0';
+  setCurrentState(estadoInicial);
+  setStatus('idle');
+  setStepCount(0);
+  setLastMove({ dir: 'S', text: 'MÁQUINA INICIALIZADA EN POSICIÓN [2]' });
+  setLogs([`// SYSTEM: algoritmo [${nombreAlgoritmo.toUpperCase()}] cargado correctamente.`]);
   };
 
   useEffect(() => {
