@@ -118,30 +118,55 @@ const ALGORITMOS = {
 };
 
 const C = {
-  bg: '#050c14', card: '#0a1628', cardBorder: '#0d2440',
-  neon: '#00e5ff', green: '#00ff88', pink: '#ff2d6b', amber: '#ffb800',
-  text: '#c8d8e8', textDim: '#4a6080', textMid: '#7a98b8',
+  bg: '#030811', card: '#071224', cardBorder: '#0b2244',
+  neon: '#00ffff', green: '#39ff14', pink: '#ff007f', amber: '#ffaa00',
+  text: '#d1e4ff', textDim: '#3a537d', textMid: '#688dbf',
 };
 
 const styles = {
-  root: { minHeight: '100vh', background: C.bg, color: C.text, fontFamily: '"Share Tech Mono", monospace', padding: '0', position: 'relative' },
-  gridBg: { position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px)`, backgroundSize: '40px 40px', pointerEvents: 'none', zIndex: 0 },
-  container: { position: 'relative', zIndex: 1, maxWidth: '1400px', margin: '0 auto', padding: '24px' },
-  header: { borderBottom: `1px solid ${C.cardBorder}`, paddingBottom: '20px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' },
-  headerTitle: { fontSize: '28px', fontWeight: '700', letterSpacing: '4px', background: `linear-gradient(135deg, ${C.neon}, ${C.green})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 },
-  headerSub: { fontSize: '12px', color: C.textMid, letterSpacing: '2px', margin: '5px 0 0 0' },
-  glossaryCard: { background: `${C.card}80`, border: `1px solid ${C.cardBorder}`, borderRadius: '8px', padding: '16px', marginBottom: '24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' },
-  glossaryTerm: { color: C.neon, fontWeight: '700', display: 'block', marginBottom: '4px' },
-  grid: { display: 'grid', gridTemplateColumns: '360px 1fr', gap: '20px' },
-  card: { background: C.card, border: `1px solid ${C.cardBorder}`, borderRadius: '8px', padding: '20px', position: 'relative' },
-  sectionTitle: (color = C.neon) => ({ fontSize: '11px', fontWeight: '700', color, letterSpacing: '2px', marginBottom: '16px' }),
-  input: { width: '100%', background: C.bg, border: `1px solid ${C.cardBorder}`, borderRadius: '4px', padding: '8px 12px', color: C.green, fontFamily: 'inherit', fontSize: '14px', outline: 'none', boxSizing: 'border-box' },
-  selectAlgo: { width: '100%', background: C.card, border: `2px solid ${C.neon}`, borderRadius: '6px', padding: '10px', color: C.neon, fontFamily: 'inherit', fontSize: '12px', fontWeight: '700', outline: 'none', marginBottom: '14px', cursor: 'pointer' },
-  btnPrimary: { flex: 1, background: `linear-gradient(135deg, ${C.neon}22, ${C.neon}11)`, border: `1px solid ${C.neon}`, borderRadius: '4px', color: C.neon, fontFamily: 'inherit', fontSize: '11px', fontWeight: '700', padding: '9px 12px', cursor: 'pointer' },
-  btnSecondary: { background: 'transparent', border: `1px solid ${C.cardBorder}`, borderRadius: '4px', color: C.textMid, fontFamily: 'inherit', fontSize: '11px', padding: '9px 14px', cursor: 'pointer' },
-  tapeWrap: { display: 'flex', alignItems: 'center', gap: '6px', overflowX: 'auto', padding: '28px 16px 16px', background: `${C.bg}cc`, border: `1px solid ${C.cardBorder}`, borderRadius: '6px' },
-  tapeCell: (isHead) => ({ flexShrink: 0, width: '48px', height: '52px', border: `1px solid ${isHead ? C.neon : C.cardBorder}`, borderRadius: '4px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', background: isHead ? `${C.neon}12` : `${C.card}`, color: isHead ? C.neon : C.textMid, fontSize: '18px' }),
-  statusBadge: (status) => ({ padding: '6px 14px', borderRadius: '4px', fontSize: '11px', border: `1px solid ${status === 'accepted' ? C.green : status === 'rejected' ? C.pink : C.neon}`, color: status === 'accepted' ? C.green : status === 'rejected' ? C.pink : C.neon, fontWeight: '700' })
+  root: { minHeight: '100vh', background: C.bg, color: C.text, fontFamily: '"Share Tech Mono", monospace', padding: '20px 0', position: 'relative' },
+  gridBg: { position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `linear-gradient(rgba(0,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,0.02) 1px, transparent 1px)`, backgroundSize: '30px 30px', pointerEvents: 'none', zIndex: 0 },
+  container: { position: 'relative', zIndex: 1, maxWidth: '1500px', margin: '0 auto', padding: '0 20px' },
+  header: { borderBottom: `2px solid ${C.cardBorder}`, paddingBottom: '16px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  headerTitle: { fontSize: '32px', fontWeight: '800', letterSpacing: '3px', background: `linear-gradient(90deg, ${C.neon}, ${C.green})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 },
+  headerSub: { fontSize: '12px', color: C.textMid, letterSpacing: '2px', marginTop: '4px' },
+  
+  // Estructura de Glosarios Completa
+  glossaryGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' },
+  glossaryCard: { background: `${C.card}bb`, border: `1px solid ${C.cardBorder}`, borderRadius: '8px', padding: '16px' },
+  glossaryItem: { fontSize: '11px', marginBottom: '10px', lineHeight: '1.4' },
+  glossaryTerm: { color: C.neon, fontWeight: '700' },
+  chomskyTerm: { color: C.pink, fontWeight: '700' },
+
+  grid: { display: 'grid', gridTemplateColumns: '380px 1fr', gap: '24px' },
+  card: { background: C.card, border: `1px solid ${C.cardBorder}`, borderRadius: '8px', padding: '20px', position: 'relative', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' },
+  sectionTitle: (color = C.neon) => ({ fontSize: '12px', fontWeight: '700', color, letterSpacing: '2px', marginBottom: '16px', textTransform: 'uppercase' }),
+  input: { width: '100%', background: '#020612', border: `1px solid ${C.cardBorder}`, borderRadius: '4px', padding: '10px 12px', color: C.green, fontFamily: 'inherit', fontSize: '14px', outline: 'none', boxSizing: 'border-box' },
+  selectAlgo: { width: '100%', background: '#040d1a', border: `2px solid ${C.neon}`, borderRadius: '6px', padding: '10px', color: C.neon, fontFamily: 'inherit', fontSize: '12px', fontWeight: '700', outline: 'none', marginBottom: '14px', cursor: 'pointer' },
+  btnPrimary: { flex: 1, background: `linear-gradient(135deg, ${C.green}33, ${C.green}11)`, border: `2px solid ${C.green}`, borderRadius: '4px', color: C.green, fontFamily: 'inherit', fontSize: '11px', fontWeight: '800', padding: '10px', cursor: 'pointer', letterSpacing: '1px' },
+  btnSecondary: { background: 'transparent', border: `1px solid ${C.cardBorder}`, borderRadius: '4px', color: C.textMid, fontFamily: 'inherit', fontSize: '11px', padding: '10px 16px', cursor: 'pointer' },
+  
+  // Cinta Mejorada Ultra High-Contrast
+  tapeWrap: { display: 'flex', alignItems: 'center', gap: '8px', overflowX: 'auto', padding: '35px 20px 35px', background: '#01040a', border: `2px solid ${C.cardBorder}`, borderRadius: '8px', boxShadow: 'inset 0 0 15px rgba(0,0,0,0.8)' },
+  tapeCell: (isHead) => ({
+    flexShrink: 0, width: '54px', height: '58px',
+    border: isHead ? `3px solid ${C.pink}` : `1px solid ${C.cardBorder}`,
+    borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative',
+    background: isHead ? `linear-gradient(180deg, #30001a, #50002a)` : '#050f1f',
+    color: isHead ? '#ffffff' : C.textMid,
+    fontSize: '22px', fontWeight: isHead ? '900' : '400',
+    boxShadow: isHead ? `0 0 20px ${C.pink}, inset 0 0 10px ${C.pink}` : 'none',
+    transform: isHead ? 'scale(1.12)' : 'scale(1)',
+    transition: 'all 0.15s ease-out',
+  }),
+  directionIndicator: (dir) => ({
+    position: 'absolute', bottom: '-28px', fontSize: '16px', fontWeight: '900',
+    color: dir === 'R' ? C.green : dir === 'L' ? C.neon : C.amber,
+    animation: 'bounce 0.6s infinite alternate',
+    textShadow: `0 0 8px ${dir === 'R' ? C.green : dir === 'L' ? C.neon : C.amber}`
+  }),
+
+  statusBadge: (status) => ({ padding: '6px 16px', borderRadius: '4px', fontSize: '12px', border: `2px solid ${status === 'accepted' ? C.green : status === 'rejected' ? C.pink : C.neon}`, color: status === 'accepted' ? C.green : status === 'rejected' ? C.pink : C.neon, fontWeight: '800', textShadow: `0 0 5px ${status==='accepted'?C.green:C.pink}` })
 };
 
 export default function App() {
@@ -154,6 +179,7 @@ export default function App() {
   const [status, setStatus] = useState('idle');
   const [stepCount, setStepCount] = useState(0);
   const [logs, setLogs] = useState([]);
+  const [lastMove, setLastMove] = useState({ dir: 'S', text: 'INICIALIZADO' });
 
   const initMachine = (inputOpcional, transicionesOpcionales, idAlgoOpcional) => {
     const cadenaALeer = inputOpcional !== undefined ? inputOpcional : tapeInput;
@@ -168,10 +194,10 @@ export default function App() {
     setCurrentState(estadoInicial);
     setStatus('idle');
     setStepCount(0);
-    setLogs([`// SYSTEM: algoritmo [${nombreAlgo.toUpperCase()}] inicializado.`]);
+    setLastMove({ dir: 'S', text: 'MÁQUINA INICIALIZADA EN POSICIÓN [2]' });
+    setLogs([`// SYSTEM: algoritmo [${nombreAlgo.toUpperCase()}] cargado correctamente.`]);
   };
 
-  // Único disparo de arranque al montar el componente
   useEffect(() => {
     initMachine(ALGORITMOS.suma_unaria.inputPorDefecto, ALGORITMOS.suma_unaria.transiciones, 'suma_unaria');
   }, []);
@@ -187,7 +213,8 @@ export default function App() {
 
     if (!rule) {
       setStatus('rejected');
-      setLogs(p => [`// ERR: Rompimiento de lógica. Sin transición para δ(${currentState}, '${currentChar}')`, ...p]);
+      setLastMove({ dir: 'S', text: '🛑 ERROR: SIN TRANSICIÓN' });
+      setLogs(p => [`// ERR: Detención abrupta. Sin transiciones para δ(${currentState}, '${currentChar}')`, ...p]);
       return;
     }
 
@@ -195,6 +222,7 @@ export default function App() {
     const charAQuedar = rule.writeChar === '*' ? currentChar : rule.writeChar;
     newTape[headPosition] = charAQuedar;
     
+    const antiguaPosicion = headPosition;
     let pos = headPosition;
     if (rule.direction === 'R') pos++;
     if (rule.direction === 'L') pos--;
@@ -206,14 +234,19 @@ export default function App() {
     setHeadPosition(pos);
     setCurrentState(rule.nextState);
     setStepCount(p => p + 1);
+    
+    // Configurar flecha y texto descriptivo del movimiento
+    const dirTexto = rule.direction === 'R' ? `DERECHA (→) de pos ${antiguaPosicion} a pos ${pos}` : rule.direction === 'L' ? `IZQUIERDA (←) de pos ${antiguaPosicion} a pos ${pos}` : `STAY (•) en pos ${pos}`;
+    setLastMove({ dir: rule.direction, text: dirTexto });
+
     setLogs(p => [`// PASO ${stepCount + 1}: δ(${currentState},'${currentChar}') → (${rule.nextState},'${charAQuedar}',${rule.direction})`, ...p]);
 
     if (rule.nextState.toLowerCase().includes('accept')) {
       setStatus('accepted');
-      setLogs(p => ['// COMPUTACIÓN COMPLETADA: Cadena aceptada de forma válida ✓', ...p]);
+      setLogs(p => ['// COMPUTACIÓN COMPLETADA: Cadena aceptada y validada con éxito ✓', ...p]);
     } else if (rule.nextState.toLowerCase().includes('reject')) {
       setStatus('rejected');
-      setLogs(p => ['// COMPUTACIÓN FALLIDA: Estado de rechazo alcanzado ✗', ...p]);
+      setLogs(p => ['// COMPUTACIÓN FALLIDA: La cadena entró en estado de rechazo ✗', ...p]);
     }
   };
 
@@ -227,34 +260,61 @@ export default function App() {
           <header style={styles.header}>
             <div>
               <h1 style={styles.headerTitle}>UNIVERSAL TURING COMPUTER //</h1>
-              <p style={styles.headerSub}>PROCESADOR DINÁMICO DE ALFABETOS MÚLTIPLES</p>
+              <p style={styles.headerSub}>SISTEMA OPERATIVO DE SIMULACIÓN Y EXPLICACIÓN FORMAL DE AUTÓMATAS</p>
             </div>
             <div style={styles.statusBadge(status)}>{status.toUpperCase()}</div>
           </header>
 
-          {/* GLOSARIO */}
-          <section style={styles.glossaryCard}>
-            <div style={{ fontSize: '11px' }}>
-              <span style={styles.glossaryTerm}>[ Σ ] ALFABETO LIBRE</span>
-              <p style={{ color: C.textMid }}>Soporta cualquier palabra, texto o número. El motor procesa cadenas de longitud infinita.</p>
+          {/* PARTE NUEVA: DOS GLOSARIOS FORMALES */}
+          <div style={styles.glossaryGrid}>
+            {/* GLOSARIO 1: ELEMENTOS DE LA MAQUINA DE TURING */}
+            <div style={styles.glossaryCard}>
+              <div style={styles.sectionTitle(C.neon)}>📋 ELEMENTOS DE LA MÁQUINA DE TURING $M = \langle Q, \Sigma, \Gamma, \delta, q_0, B, F \rangle$</div>
+              <div style={styles.glossaryItem}>
+                <span style={styles.glossaryTerm}>$Q$ (Conjunto Finito de Estados):</span> Todos los estados internos lógicos en los que se puede encontrar el procesador (Ej: `q0`, `busca_A`).
+              </div>
+              <div style={styles.glossaryItem}>
+                <span style={styles.glossaryTerm}>$\Sigma$ (Alfabeto de Entrada):</span> Símbolos permitidos en la cadena original que escribe el usuario antes de iniciar la computación.
+              </div>
+              <div style={styles.glossaryItem}>
+                <span style={styles.glossaryTerm}>$\Gamma$ (Alfabeto de la Cinta):</span> Símbolos totales que la máquina puede escribir. Incluye a $\Sigma$ y al símbolo Blanco ($\Gamma > \Sigma$).
+              </div>
+              <div style={styles.glossaryItem}>
+                <span style={styles.glossaryTerm}>$B$ o $\_$ (Símbolo Blanco):</span> Carácter de espacio vacío que llena la cinta hasta el infinito a la izquierda y derecha.
+              </div>
+              <div style={styles.glossaryItem}>
+                <span style={styles.glossaryTerm}>$\delta$ (Función de Transición):</span> La matriz matemática que dicta la ejecución: $\delta(q_{act}, \text{letra}) \rightarrow (q_{sig}, \text{escribe}, \text{Dirección})$.
+              </div>
+              <div style={styles.glossaryItem}>
+                <span style={styles.glossaryTerm}>Cabezal de Lectura/Escritura:</span> El puntero físico-lógico que se desplaza por las celdas leyendo, editando caracteres y moviéndose ($R, L, S$).
+              </div>
             </div>
-            <div style={{ fontSize: '11px' }}>
-              <span style={styles.glossaryTerm}>[ * ] REGLA COMODÍN</span>
-              <p style={{ color: C.textMid }}>Un símbolo especial <b style={{ color: C.amber }}>*</b> en la tabla significa "procesa cualquier carácter desconocido sin detenerte".</p>
-            </div>
-            <div style={{ fontSize: '11px' }}>
-              <span style={styles.glossaryTerm}>[ δ ] MÁQUINA UNIVERSAL</span>
-              <p style={{ color: C.textMid }}>Puedes cambiar el algoritmo en el menú desplegable para reconfigurar la arquitectura al instante.</p>
-            </div>
-          </section>
 
-          {/* INTERFAZ PRINCIPAL */}
+            {/* GLOSARIO 2: JERARQUÍA DE CHOMSKY */}
+            <div style={styles.glossaryCard}>
+              <div style={styles.sectionTitle(C.pink)}>🏛️ JERARQUÍA DE CHOMSKY (Clasificación de Lenguajes Formales)</div>
+              <div style={styles.glossaryItem}>
+                <span style={styles.chomskyTerm}>Tipo 0 (Gramáticas No Restringidas):</span> Reconocidas por las **Máquinas de Turing**. Son el tope de poder de cómputo; procesan cualquier lenguaje computable recursivamente enumerable.
+              </div>
+              <div style={styles.glossaryItem}>
+                <span style={styles.chomskyTerm}>Tipo 1 (Gramáticas Sensibles al Contexto):</span> Reconocidas por **Autómatas Linealmente Acotados**. El tamaño de la memoria de trabajo está limitado por la longitud de la entrada.
+              </div>
+              <div style={styles.glossaryItem}>
+                <span style={styles.chomskyTerm}>Tipo 2 (Gramáticas Libres de Contexto):</span> Reconocidas por **Autómatas de Pila (PDA)**. Utilizan estructuras de tipo LIFO (pilas) para procesar anidaciones, como los paréntesis balanceados.
+              </div>
+              <div style={styles.glossaryItem}>
+                <span style={styles.chomskyTerm}>Tipo 3 (Gramáticas Regulares):</span> Reconocidas por **Autómatas Finitos (AFD / AFND)**. Son las más simples (Ej: expresiones regulares). No tienen memoria a largo plazo ni cintas.
+              </div>
+            </div>
+          </div>
+
+          {/* INTERFAZ PRINCIPAL DE TRABAJO */}
           <div style={styles.grid}>
             
-            {/* PANEL CONTROL */}
+            {/* PANEL IZQUIERDO DE CONTROL */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={styles.card}>
-                <div style={styles.sectionTitle(C.neon)}>🛠️ SELECCIONAR PROCESADOR</div>
+                <div style={styles.sectionTitle(C.neon)}>🛠️ CARGAR LÓGICA DE COMPUTACIÓN</div>
                 
                 <select 
                   style={styles.selectAlgo} 
@@ -273,11 +333,11 @@ export default function App() {
                   ))}
                 </select>
 
-                <p style={{ fontSize: '10px', color: C.textMid, marginBottom: '14px', lineHeight: '1.4' }}>
+                <p style={{ fontSize: '11px', color: C.textMid, marginBottom: '16px', lineHeight: '1.4' }}>
                   {ALGORITMOS[algoritmoActual].descripcion}
                 </p>
 
-                <label style={{ fontSize: '10px', color: C.textDim, display: 'block', marginBottom: '4px' }}>CINTA DE ENTRADA (INPUT)</label>
+                <label style={{ fontSize: '10px', color: C.textDim, display: 'block', marginBottom: '6px', letterSpacing: '1px' }}>CINTA DE ENTRADA ($\Sigma$)</label>
                 <input
                   style={styles.input}
                   type="text"
@@ -286,48 +346,62 @@ export default function App() {
                   disabled={status !== 'idle'}
                 />
 
-                <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
                   <button style={styles.btnPrimary} onClick={stepExecution} disabled={status==='accepted'||status==='rejected'}>▶ EJECUTAR PASO</button>
                   <button style={styles.btnSecondary} onClick={() => initMachine()}>↺ RESET</button>
                 </div>
               </div>
+
+              {/* RECUADRO DE MOVIMIENTO REALZADO */}
+              <div style={{...styles.card, borderLeft: `4px solid ${C.amber}`}}>
+                <div style={styles.sectionTitle(C.amber)}>📍 RASTREADOR DE DIRECCIÓN</div>
+                <div style={{fontSize: '13px', fontWeight: 'bold', color: '#fff'}}>{lastMove.text}</div>
+              </div>
             </div>
 
-            {/* PANEL CINTA Y OUTPUT */}
+            {/* PANEL DERECHO: CINTA HIGH CONTRAST Y ESTADOS */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={styles.card}>
-                <div style={styles.sectionTitle(C.textMid)}>◈ MONITOR DE CINTA COMPLIANT</div>
+                <div style={styles.sectionTitle(C.textMid)}>◈ MONITOR DE TRABAJO DE CINTA FIJA ($\Gamma$)</div>
                 <div style={styles.tapeWrap}>
-                  {tape.map((char, i) => (
-                    <div key={i} style={styles.tapeCell(i === headPosition)}>
-                      {i === headPosition && <div style={{ position: 'absolute', top: '-18px', color: C.neon, fontSize: '10px' }}>▼</div>}
-                      <span>{char}</span>
-                      <span style={{ fontSize: '8px', color: C.textDim, position: 'absolute', bottom: '2px' }}>{i}</span>
-                    </div>
-                  ))}
+                  {tape.map((char, i) => {
+                    const isHead = i === headPosition;
+                    return (
+                      <div key={i} style={styles.tapeCell(isHead)}>
+                        {isHead && <div style={{ position: 'absolute', top: '-18px', color: C.pink, fontSize: '12px', fontWeight: '900' }}>▼ CABEZAL</div>}
+                        <span>{char}</span>
+                        <span style={{ fontSize: '9px', color: isHead ? '#ffb3d9' : C.textDim, position: 'absolute', bottom: '2px' }}>{i}</span>
+                        {isHead && (
+                          <div style={styles.directionIndicator(lastMove.dir)}>
+                            {lastMove.dir === 'R' ? '→' : lastMove.dir === 'L' ? '←' : '•'}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '14px' }}>
-                  <div style={{ background: C.bg, padding: '10px', borderRadius: '4px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '8px', color: C.textDim }}>ESTADO</div>
-                    <div style={{ color: C.neon, fontWeight: '700' }}>{currentState}</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginTop: '20px' }}>
+                  <div style={{ background: '#020612', padding: '12px', borderRadius: '4px', textAlign: 'center', border: `1px solid ${C.cardBorder}` }}>
+                    <div style={{ fontSize: '9px', color: C.textDim, letterSpacing: '1px' }}>ESTADO ACTUAL ($Q$)</div>
+                    <div style={{ color: C.neon, fontWeight: '700', fontSize: '16px', marginTop: '4px' }}>{currentState}</div>
                   </div>
-                  <div style={{ background: C.bg, padding: '10px', borderRadius: '4px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '8px', color: C.textDim }}>POSICIÓN</div>
-                    <div style={{ color: C.green, fontWeight: '700' }}>{headPosition}</div>
+                  <div style={{ background: '#020612', padding: '12px', borderRadius: '4px', textAlign: 'center', border: `1px solid ${C.cardBorder}` }}>
+                    <div style={{ fontSize: '9px', color: C.textDim, letterSpacing: '1px' }}>POSICIÓN CABEZAL</div>
+                    <div style={{ color: C.green, fontWeight: '700', fontSize: '16px', marginTop: '4px' }}>{headPosition}</div>
                   </div>
-                  <div style={{ background: C.bg, padding: '10px', borderRadius: '4px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '8px', color: C.textDim }}>PASOS</div>
-                    <div style={{ color: C.amber, fontWeight: '700' }}>{stepCount}</div>
+                  <div style={{ background: '#020612', padding: '12px', borderRadius: '4px', textAlign: 'center', border: `1px solid ${C.cardBorder}` }}>
+                    <div style={{ fontSize: '9px', color: C.textDim, letterSpacing: '1px' }}>PASOS CALCULADOS</div>
+                    <div style={{ color: C.amber, fontWeight: '700', fontSize: '16px', marginTop: '4px' }}>{stepCount}</div>
                   </div>
                 </div>
               </div>
 
-              {/* LOGS */}
+              {/* LOGS / CONSOLA */}
               <div style={styles.card}>
-                <div style={{ fontSize: '9px', color: C.textDim, marginBottom: '6px' }}>CONSOLE_OUTPUT //</div>
-                <div style={{ background: '#020810', padding: '10px', height: '110px', overflowY: 'auto', fontSize: '11px', borderRadius: '4px' }}>
-                  {logs.map((l, idx) => <div key={idx} style={{ color: l.includes('COMPLETADA')? C.green : l.includes('ERR')? C.pink : C.textMid }}>{l}</div>)}
+                <div style={{ fontSize: '10px', color: C.textDim, marginBottom: '6px', letterSpacing: '1px' }}>CONSOLE_OUTPUT // REGISTRO DE TRABAJO $\delta$</div>
+                <div style={{ background: '#01050f', padding: '12px', height: '130px', overflowY: 'auto', fontSize: '12px', borderRadius: '4px', border: `1px solid ${C.cardBorder}` }}>
+                  {logs.map((l, idx) => <div key={idx} style={{ padding: '2px 0', color: l.includes('COMPLETADA')? C.green : l.includes('ERR')? C.pink : C.textMid, fontFamily: 'monospace' }}>{l}</div>)}
                 </div>
               </div>
 
@@ -336,6 +410,14 @@ export default function App() {
 
         </div>
       </div>
+      
+      {/* Estilos inyectados directos para animaciones del neón */}
+      <style>{`
+        @keyframes bounce {
+          from { transform: translateY(0); }
+          to { transform: translateY(4px); }
+        }
+      `}</style>
     </>
   );
 }
