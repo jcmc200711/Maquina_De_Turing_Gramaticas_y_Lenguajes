@@ -298,8 +298,8 @@ export default function App() {
           {/* HEADER */}
           <header style={styles.header}>
             <div>
-              <h1 style={styles.headerTitle}>UNIVERSAL TURING COMPUTER //</h1>
-              <p style={styles.headerSub}>SISTEMA OPERATIVO DE SIMULACIÓN Y EXPLICACIÓN FORMAL DE AUTÓMATAS</p>
+              <h1 style={styles.headerTitle}>MÁQUINA DE TURING //</h1>
+              <p style={styles.headerSub}>SIMULACIÓN Y EXPLICACIÓN FORMAL DE AUTÓMATAS</p>
             </div>
             <div style={styles.statusBadge(status)}>{status.toUpperCase()}</div>
           </header>
