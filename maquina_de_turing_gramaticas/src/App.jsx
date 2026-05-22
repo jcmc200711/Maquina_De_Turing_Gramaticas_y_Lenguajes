@@ -175,7 +175,10 @@ const styles = {
 export default function App() {
   const [algoritmoActual, setAlgoritmoActual] = useState('suma_unaria');
   const [tapeInput, setTapeInput] = useState(ALGORITMOS.suma_unaria.inputPorDefecto);
-  
+
+  const [glosarioTuringAbierto, setGlosarioTuringAbierto] = useState(false);
+  const [glosarioChomskyAbierto, setGlosarioChomskyAbierto] = useState(false);
+
   const [tape, setTape] = useState(() => {
     const t = ALGORITMOS.suma_unaria.inputPorDefecto.split('');
     return ['_', '_', ...(t.length ? t : ['_']), '_', '_'];
@@ -301,74 +304,87 @@ export default function App() {
             <div style={styles.statusBadge(status)}>{status.toUpperCase()}</div>
           </header>
 
-          {/* DOS GLOSARIOS FORMALES AMPLIADOS Y DETALLADOS (CORREGIDOS PARA JSX) */}
+          {/* DOS GLOSARIOS FORMALES COLAPSABLES */}
           <div style={styles.glossaryGrid}>
             
             {/* PANEL: ELEMENTOS DE LA MÁQUINA DE TURING */}
             <div style={styles.glossaryCard}>
-              <div style={styles.sectionTitle(C.neon)}>📋 ELEMENTOS FORMALES DE LA MÁQUINA DE TURING M = {"⟨Q, Σ, Γ, δ, q0, B, F⟩"}</div>
-              
-              <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>Q (Conjunto Finito de Estados):</span> Es el "cerebro" o la memoria interna del procesador de control. Representa todas las situaciones lógicas posibles en las que el autómata puede encontrarse en un instante dado (por ejemplo, `q0` para inicio, `busca_A` o `acarreo`). Regula qué decisiones tomar según el símbolo leído.
+              {/* CABECERA CLICKABLE */}
+              <div 
+                style={{ ...styles.sectionTitle(C.neon), cursor: 'pointer', display: 'flex', justifyContent: 'between', alignItems: 'center', userSelect: 'none' }}
+                onClick={() => setGlosarioTuringAbierto(!glosarioTuringAbierto)}
+              >
+                <span>📋 ELEMENTOS FORMALES DE LA MÁQUINA DE TURING M = {"⟨Q, Σ, Γ, δ, q0, B, F⟩"}</span>
+                <span style={{ marginLeft: '10px', color: C.neon }}>{glosarioTuringAbierto ? '▼' : '►'}</span>
               </div>
               
-              <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>Σ (Alfabeto de Entrada):</span> El conjunto finito de símbolos válidos y permitidos que el usuario puede escribir en la cinta *antes* de iniciar la computación (el input original). **Restricción formal:** El símbolo blanco (`_` o `B`) **no** pertenece a este alfabeto {"(Σ ∩ {B} = ∅)"}.
-              </div>
-              
-              <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>Γ (Alfabeto de la Cinta):</span> El superconjunto de caracteres legibles y escribibles en la cinta. Contiene de manera obligatoria a todo el alfabeto de entrada (Σ) y añade símbolos de control adicionales de trabajo, incluyendo por defecto al símbolo blanco {"(Σ ⊂ Γ)"}.
-              </div>
-              
-              <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>B o _ (Símbolo Blanco / Blank):</span> Representa una celda vacía en la cinta. Al inicio, delimita los bordes de la cadena de entrada y se extiende infinitamente hacia la izquierda {"(-∞)"} y hacia la derecha {"(+∞)"}, proveyendo a la máquina de una memoria de trabajo virtual ilimitada.
-              </div>
-              
-              <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>δ (Función de Transición):</span> El mapeo matemático detallado como {"δ: Q × Γ → Q × Γ × {L, R, S}"}. Recibe el estado actual y el carácter bajo el cabezal para determinar tres acciones inmediatas: transicionar a un nuevo estado, sobreescribir la celda con un nuevo carácter y desplazar el cabezal hacia la Izquierda (**L**), Derecha (**R**) o Permanecer (**S**).
-              </div>
-              
-              <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>q0 (Estado Inicial):</span> Es el estado único del conjunto Q {"(q0 ∈ Q)"} donde la Unidad de Control de la máquina se posiciona de forma automática al recibir energía o reiniciarse, marcando el punto de partida de la computación.
-              </div>
-              
-              <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>F o q_accept (Conjunto de Estados Finales o de Aceptación):</span> Subconjunto de estados {"(F ⊆ Q)"} que determinan la detención exitosa del sistema. Si la máquina procesa la cinta y logra estacionarse en uno de estos estados, significa que la cadena original pertenece formalmente al lenguaje modelado.
-              </div>
-              
-              <div style={styles.glossaryItem}>
-                <span style={styles.glossaryTerm}>Cabezal de Lectura/Escritura:</span> El puntero físico-lógico de acceso a la cinta. Apunta a una sola celda a la vez. Lee su contenido para alimentar a la función δ, edita el símbolo si la regla lo exige y altera su posición según la dirección indicada por la transición.
-              </div>
+              {/* CONTENIDO DESPLEGABLE */}
+              {glosarioTuringAbierto && (
+                <div style={{ marginTop: '12px', borderTop: `1px dashed ${C.cardBorder}`, paddingTop: '10px' }}>
+                  <div style={styles.glossaryItem}>
+                    <span style={styles.glossaryTerm}>Q (Conjunto Finito de Estados):</span> Es el "cerebro" o la memoria interna del procesador de control. Representa todas las situaciones lógicas posibles en las que el autómata puede encontrarse en un instante dado.
+                  </div>
+                  <div style={styles.glossaryItem}>
+                    <span style={styles.glossaryTerm}>Σ (Alfabeto de Entrada):</span> El conjunto finito de símbolos válidos y permitidos que el usuario puede escribir en la cinta *antes* de iniciar la computación. **Restricción formal:** {"(Σ ∩ {B} = ∅)"}.
+                  </div>
+                  <div style={styles.glossaryItem}>
+                    <span style={styles.glossaryTerm}>Γ (Alfabeto de la Cinta):</span> El superconjunto de caracteres legibles y escribibles en la cinta. Contiene a todo el alfabeto de entrada y añade símbolos de trabajo {"(Σ ⊂ Γ)"}.
+                  </div>
+                  <div style={styles.glossaryItem}>
+                    <span style={styles.glossaryTerm}>B o _ (Símbolo Blanco / Blank):</span> Representa una celda vacía en la cinta. Al inicio, delimita los bordes de la cadena de entrada y se extiende infinitamente proveyendo memoria ilimitada.
+                  </div>
+                  <div style={styles.glossaryItem}>
+                    <span style={styles.glossaryTerm}>δ (Función de Transición):</span> El mapeo matemático detallado como {"δ: Q × Γ → Q × Γ × {L, R, S}"}. Determina el nuevo estado, qué escribir y hacia dónde mover el cabezal.
+                  </div>
+                  <div style={styles.glossaryItem}>
+                    <span style={styles.glossaryTerm}>q0 (Estado Inicial):</span> Es el estado único del conjunto Q {"(q0 ∈ Q)"} donde la Unidad de Control de la máquina se posiciona de forma automática al iniciar.
+                  </div>
+                  <div style={styles.glossaryItem}>
+                    <span style={styles.glossaryTerm}>F o q_accept (Conjunto de Estados Finales):</span> Subconjunto de estados {"(F ⊆ Q)"} que determinan la detención exitosa del sistema (la cadena pertenece al lenguaje).
+                  </div>
+                  <div style={styles.glossaryItem}>
+                    <span style={styles.glossaryTerm}>Cabezal de Lectura/Escritura:</span> El puntero físico-lógico de acceso a la cinta. Apunta a una sola celda a la vez, lee, edita y se desplaza.
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* PANEL: JERARQUÍA DE CHOMSKY */}
             <div style={styles.glossaryCard}>
-              <div style={styles.sectionTitle(C.pink)}>🏛️ JERARQUÍA DE CHOMSKY (Clasificación de Lenguajes y Autómatas)</div>
-              
-              <div style={styles.glossaryItem}>
-                <span style={styles.chomskyTerm}>Tipo 0 (Gramáticas No Restringidas / Lenguajes Recursivamente Enumerables):</span> 
-                Reconocidas universalmente por las **Máquinas de Turing**. No poseen restricciones en sus reglas de producción de cadenas {"(α → β)"}. Modelan cualquier problema computable y representan el límite absoluto del poder de cómputo en la informática clásica (Turing-completitud).
+              {/* CABECERA CLICKABLE */}
+              <div 
+                style={{ ...styles.sectionTitle(C.pink), cursor: 'pointer', display: 'flex', justifyContent: 'between', alignItems: 'center', userSelect: 'none' }}
+                onClick={() => setGlosarioChomskyAbierto(!glosarioChomskyAbierto)}
+              >
+                <span>🏛️ JERARQUÍA DE CHOMSKY (Clasificación de Lenguajes y Autómatas)</span>
+                <span style={{ marginLeft: '10px', color: C.pink }}>{glosarioChomskyAbierto ? '▼' : '►'}</span>
               </div>
               
-              <div style={styles.glossaryItem}>
-                <span style={styles.chomskyTerm}>Tipo 1 (Gramáticas Sensibles al Contexto / Lenguajes Sensibles al Contexto):</span> 
-                Reconocidas por **Autómatas Linealmente Acotados (LBA)**. La longitud de la cadena resultante en una sustitución debe ser mayor o igual a la original {"(|α| ≤ |β|)"}. El autómata tiene una cinta de memoria, pero su espacio de trabajo está estrictamente acotado por el tamaño del input.
-              </div>
-              
-              <div style={styles.glossaryItem}>
-                <span style={styles.chomskyTerm}>Tipo 2 (Gramáticas Libres de Contexto / Lenguajes Independientes del Contexto):</span> 
-                Reconocidas por los **Autómatas de Pila (PDA)**. Sus producciones sustituyen un único símbolo no-terminal sin importar qué tenga a los lados {"(A → β)"}. Utilizan una memoria auxiliar de tipo LIFO (Pila / Stack) para rastrear anidaciones complejas, balanceo de paréntesis o estructuras sintácticas de lenguajes de programación.
-              </div>
-              
-              <div style={styles.glossaryItem}>
-                <span style={styles.chomskyTerm}>Tipo 3 (Gramáticas Regulares / Lenguajes Regulares):</span> 
-                Reconocidas por los **Autómatas Finitos (AFD / AFND)**. Son los más restrictivos; sus producciones solo añaden terminales a un extremo. Carecen por completo de memoria dinámica externa (no tienen cintas ni pilas); solo transicionan entre estados rígidos. Utilizados en el análisis léxico y motores de expresiones regulares (Regex).
-              </div>
-              
-              <div style={styles.glossaryItem}>
-                <span style={{ color: C.amber, fontWeight: '700' }}>Inclusión de Conjuntos Formales:</span> 
-                Cumplen un orden jerárquico estricto de contención: {"Tipo 3 ⊂ Tipo 2 ⊂ Tipo 1 ⊂ Tipo 0"}. Todo lenguaje regular es libre de contexto, todo libre de contexto es sensible al contexto, y todos ellos pueden ser resueltos por tu Máquina de Turing.
-              </div>
+              {/* CONTENIDO DESPLEGABLE */}
+              {glosarioChomskyAbierto && (
+                <div style={{ marginTop: '12px', borderTop: `1px dashed ${C.cardBorder}`, paddingTop: '10px' }}>
+                  <div style={styles.glossaryItem}>
+                    <span style={styles.chomskyTerm}>Tipo 0 (Gramáticas No Restringidas / Lenguajes Recursivamente Enumerables):</span> 
+                    Reconocidas universalmente por las **Máquinas de Turing**. No poseen restricciones en sus reglas de producción de cadenas {"(α → β)"}. Modelan cualquier problema computable.
+                  </div>
+                  <div style={styles.glossaryItem}>
+                    <span style={styles.chomskyTerm}>Tipo 1 (Gramáticas Sensibles al Contexto / Lenguajes Sensibles al Contexto):</span> 
+                    Reconocidas por **Autómatas Linealmente Acotados (LBA)**. La longitud de la cadena sustituida debe ser mayor o igual a la original {"(|α| ≤ |β|)"}. Espacio limitado al input.
+                  </div>
+                  <div style={styles.glossaryItem}>
+                    <span style={styles.chomskyTerm}>Tipo 2 (Gramáticas Libres de Contexto / Lenguajes Independientes del Contexto):</span> 
+                    Reconocidas por los **Autómatas de Pila (PDA)**. Sustituyen un único símbolo no-terminal {"(A → β)"}. Utilizan una memoria auxiliar tipo LIFO (Pila) para balanceos y sintaxis.
+                  </div>
+                  <div style={styles.glossaryItem}>
+                    <span style={styles.chomskyTerm}>Tipo 3 (Gramáticas Regulares / Lenguajes Regulares):</span> 
+                    Reconocidas por los **Autómatas Finitos (AFD / AFND)**. Carecen por completo de memoria dinámica externa; solo transicionan entre estados rígidos. Usados en Regex y análisis léxico.
+                  </div>
+                  <div style={styles.glossaryItem}>
+                    <span style={{ color: C.amber, fontWeight: '700' }}>Inclusión de Conjuntos Formales:</span> 
+                    Cumplen un orden jerárquico estricto de contención: {"Tipo 3 ⊂ Tipo 2 ⊂ Tipo 1 ⊂ Tipo 0"}. Todo lenguaje regular es libre de contexto, y todos ellos pueden ser resueltos por tu Máquina de Turing.
+                  </div>
+                </div>
+              )}
             </div>
 
           </div>
