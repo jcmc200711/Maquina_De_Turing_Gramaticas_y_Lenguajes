@@ -36,17 +36,28 @@ const ALGORITMOS = {
     descripcion: "Ordenamiento: Separa dos tribus rivales (X e Y) mezcladas en la cinta, moviendo los miembros 'X' a la izquierda.",
     inputPorDefecto: "YXXYXY",
     transiciones: [
+      // 1. Escaneo desde el inicio (q0)
       { currentState: 'q0', readChar: 'X', nextState: 'q0', writeChar: 'X', direction: 'R' },
       { currentState: 'q0', readChar: 'Y', nextState: 'busca_X', writeChar: 'Y', direction: 'R' },
+      // ¡Única condición de aceptación real!: q0 llegó al final sin dejar Ys colgadas atrás
       { currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
+
+      // 2. Estado de búsqueda
       { currentState: 'busca_X', readChar: 'Y', nextState: 'busca_X', writeChar: 'Y', direction: 'R' },
       { currentState: 'busca_X', readChar: 'X', nextState: 'retrocede', writeChar: 'Y', direction: 'L' },
-      { currentState: 'busca_X', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
+      // Si busca_X llega al final, NO acepta. Viaja a la izquierda a resetear el ciclo
+      { currentState: 'busca_X', readChar: '_', nextState: 'retorno_final', writeChar: '_', direction: 'L' },
+
+      // 3. Mecanismo de intercambio local
       { currentState: 'retrocede', readChar: 'Y', nextState: 'cambia_A_X', writeChar: 'X', direction: 'L' },
       { currentState: 'cambia_A_X', readChar: 'X', nextState: 'q0', writeChar: 'X', direction: 'R' },
       { currentState: 'cambia_A_X', readChar: 'Y', nextState: 'q0', writeChar: 'Y', direction: 'R' },
-      // 👇 REGLA SALVADORA: Si retrocede tanto que choca con el borde blanco izquierdo, rebota a la derecha hacia q0
-      { currentState: 'cambia_A_X', readChar: '_', nextState: 'q0', writeChar: '_', direction: 'R' } 
+      { currentState: 'cambia_A_X', readChar: '_', nextState: 'q0', writeChar: '_', direction: 'R' },
+
+      // 4. Reset general para dar otra pasada de ordenamiento (Burbuja)
+      { currentState: 'retorno_final', readChar: 'X', nextState: 'retorno_final', writeChar: 'X', direction: 'L' },
+      { currentState: 'retorno_final', readChar: 'Y', nextState: 'retorno_final', writeChar: 'Y', direction: 'L' },
+      { currentState: 'retorno_final', readChar: '_', nextState: 'q0', writeChar: '_', direction: 'R' }
     ]
   },
   parentesis_balanceados: {
