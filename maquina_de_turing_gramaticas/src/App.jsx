@@ -1,4 +1,90 @@
 import { useState, useCallback } from 'react';
+import { MarkerType } from '@xyflow/react';
+import { ReactFlow, Background, Controls } from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+
+// Genera nodos y flechas iluminados dinámicamente según el estado actual
+const generarGrafoDesdeTransiciones = (transiciones, currentState, C) => {
+  // 1. Obtener todos los estados únicos implicados
+  const estadosUnicos = Array.from(
+    new Set([
+      'q0', 
+      'q_accept', 
+      ...transiciones.map(t => t.currentState), 
+      ...transiciones.map(t => t.nextState)
+    ])
+  );
+
+  // 2. Posicionar los nodos horizontalmente con espacio amplio (Gran formato)
+  const nodes = estadosUnicos.map((estado, index) => {
+    const esActivo = estado === currentState;
+    const esAceptacion = estado.toLowerCase().includes('accept');
+    
+    // Asignación de colores neón según el tipo de estado
+    let colorBorde = C.neon;
+    if (esAceptacion) colorBorde = C.green;
+    else if (estado === 'q0') colorBorde = C.amber;
+
+    return {
+      id: estado,
+      data: { label: estado.toUpperCase() },
+      position: { x: index * 220 + 80, y: 150 + (index % 2 * 60) }, // Layout escalonado para evitar colisiones
+      style: {
+        background: C.card,
+        color: '#ffffff',
+        border: `2px solid ${esActivo ? colorBorde : `${colorBorde}66`}`,
+        borderRadius: esAceptacion ? '50%' : '8px',
+        padding: '12px',
+        fontWeight: esActivo ? 'bold' : 'normal',
+        width: esAceptacion ? 80 : 110,
+        height: esAceptacion ? 80 : 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'monospace',
+        fontSize: '13px',
+        boxShadow: esActivo ? `0 0 20px ${colorBorde}` : 'none',
+        transition: 'all 0.3s ease',
+      },
+    };
+  });
+
+  // 3. Crear las flechas de transición (Edges)
+  const edges = transiciones.map((t, idx) => {
+    // Una transición está activa si salimos de ella en el estado actual
+    const esActiva = t.currentState === currentState;
+
+    return {
+      id: `e-${idx}`,
+      source: t.currentState,
+      target: t.nextState,
+      label: `${t.readChar} → ${t.writeChar}, ${t.direction}`,
+      animated: esActiva, // ¡La flecha actual se mueve en tiempo real!
+      type: 'bezier',
+      style: {
+        stroke: esActiva ? C.pink : `${C.cardBorder}`,
+        strokeWidth: esActiva ? 3 : 1.5,
+        transition: 'all 0.3s ease',
+      },
+      labelStyle: { 
+        fill: esActiva ? C.pink : C.textDim, 
+        fontWeight: esActiva ? 'bold' : 'normal',
+        fontSize: '10px',
+        fontFamily: 'monospace'
+      },
+      labelBgStyle: { fill: C.background, fillOpacity: 0.85 },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 15,
+        height: 15,
+        color: esActiva ? C.pink : C.cardBorder,
+      },
+    };
+  });
+
+  return { nodes, edges };
+};
+
 
 // BANCO DE ALGORITMOS PRECONFIGURADOS
 const ALGORITMOS = {
@@ -600,6 +686,37 @@ export default function App() {
               </table>
             </div>
           </div>
+
+          {/* 🌟 NUEVO GRANDE Y BAJO LA TABLA: VISOR DE GRAFO INTERACTIVO NEÓN */}
+  <div style={{ ...styles.card, height: '450px', padding: '0px', relative: 'relative', overflow: 'hidden' }}>
+    <div style={{ ...styles.sectionTitle(C.pink), padding: '16px 20px 0 20px' }}>
+      📊 DIAGRAMA DE TRANSICIONES INTERACTIVO (δ)
+    </div>
+    
+    <div style={{ width: '100%', height: '390px' }}>
+      {(() => {
+        // Obtenemos los nodos y flechas calculados en tiempo real para el paso actual
+        const { nodes, edges } = generarGrafoDesdeTransiciones(transitions, currentState, C);
+        
+        return (
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            fitView
+            nodesConnectable={false}
+            nodesDraggable={true} // Permite al usuario reacomodar los círculos si se enciman
+            zoomOnScroll={true}
+            style={{ background: '#01040a' }}
+          >
+            {/* Fondo de rejilla Cyberpunk */}
+            <Background color="#00ffff" opacity={0.03} gap={20} size={1} />
+            {/* Controles de Zoom nativos montados en la esquina */}
+            <Controls style={{ background: C.card, border: `1px solid ${C.cardBorder}`, color: '#fff' }} />
+          </ReactFlow>
+        );
+      })()}
+    </div>
+  </div>
 
         </div>
       </div>
