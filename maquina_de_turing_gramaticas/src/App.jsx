@@ -91,38 +91,45 @@ const ALGORITMOS = {
     ]
   },
   el_palindromo: {
-    nombre: "🔄 DETECTOR DE PALÍNDROMOS UNIVERSAL (A-Z)",
-    descripcion: "Compara los extremos de la palabra uno a uno eliminándolos. ¡Soporta dinámicamente cualquier letra de la A a la Z!",
-    inputPorDefecto: "RECONOCER",
+    nombre: "🔄 DETECTOR DE PALÍNDROMOS UNIVERSAL (A, B, C, 0, 1)",
+    descripcion: "Compara los extremos de la palabra uno a uno eliminándolos. ¡Soporta de forma unificada las letras A, B, C y los bits 0, 1!",
+    inputPorDefecto: "A10BA01A",
     transiciones: (() => {
-      const alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+      // 🌟 Declaramos el alfabeto combinado que necesitas
+      const alfabeto = ["A", "B", "C", "0", "1"];
       let t = [];
 
       // 1. Transiciones desde el estado inicial q0
+      // Lee el primer carácter, lo borra para marcarlo como procesado y abre su rama específica
       alfabeto.forEach(letra => {
         t.push({ currentState: 'q0', readChar: letra, nextState: `busca_${letra}`, writeChar: '_', direction: 'R' });
       });
+      // Si lee un espacio en blanco de entrada, significa que la cadena está vacía o terminamos con éxito
       t.push({ currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' });
 
-      // 2. Generación dinámica de estados de búsqueda y comparación por cada letra
+      // 2. Generación dinámica de estados de búsqueda y comparación por cada elemento
       alfabeto.forEach(letraActual => {
-        // En el estado busca_LETRA, salta cualquier otra letra moviéndose a la derecha
+        // En el estado busca_LETRA, salta CUALQUIER elemento del alfabeto moviéndose a la derecha
         alfabeto.forEach(letraSalto => {
           t.push({ currentState: `busca_${letraActual}`, readChar: letraSalto, nextState: `busca_${letraActual}`, writeChar: letraSalto, direction: 'R' });
         });
-        // Cuando encuentra el espacio en blanco al final, retrocede un paso para comparar
+        // Cuando encuentra el espacio en blanco al final de la cinta, retrocede un paso a la izquierda para comparar
         t.push({ currentState: `busca_${letraActual}`, readChar: '_', nextState: `compara_${letraActual}`, writeChar: '_', direction: 'L' });
 
-        // Si la letra del extremo derecho coincide con la que buscamos, la borra y regresa
+        // Si la celda del extremo derecho coincide con la que buscamos, la borra y activa el retorno
         t.push({ currentState: `compara_${letraActual}`, readChar: letraActual, nextState: 'retorno', writeChar: '_', direction: 'L' });
-        // Caso especial: si es de longitud impar, se cruzará con un espacio vacío
+        
+        // Caso especial (longitudes impares): si al ir a comparar se cruza con un espacio vacío,
+        // significa que era el carácter del centro de la palabra y ya está emparejado. ¡Se acepta!
         t.push({ currentState: `compara_${letraActual}`, readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' });
       });
 
-      // 3. Estado de retorno al extremo izquierdo saltando cualquier letra
+      // 3. Estado de retorno al extremo izquierdo
+      // Salta cualquier elemento del alfabeto moviéndose todo hacia la izquierda
       alfabeto.forEach(letraSalto => {
         t.push({ currentState: 'retorno', readChar: letraSalto, nextState: 'retorno', writeChar: letraSalto, direction: 'L' });
       });
+      // Cuando topa con el blanco del inicio, avanza un paso a la derecha y reinicia en q0
       t.push({ currentState: 'retorno', readChar: '_', nextState: 'q0', writeChar: '_', direction: 'R' });
 
       return t;
