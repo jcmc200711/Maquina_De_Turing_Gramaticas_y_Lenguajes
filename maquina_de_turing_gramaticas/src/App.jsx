@@ -27,32 +27,50 @@ const ALGORITMOS = {
   },
   ejemplo_tribus: {
     nombre: "⛺ EJEMPLO DE LAS TRIBUS (Segregación)",
-    descripcion: "Ordenamiento: Separa dos tribus rivales (X e Y) mezcladas en la cinta, moviendo los miembros 'X' a la izquierda.",
+    descripcion: "Ordenamiento: Separa dos tribus rivales (X e Y) moviendo las 'X' a la izquierda mediante intercambios sucesivos.",
     inputPorDefecto: "YXXYXY",
     transiciones: [
+      // q0 busca una 'Y' para empezar a controlar el orden
       { currentState: 'q0', readChar: 'X', nextState: 'q0', writeChar: 'X', direction: 'R' },
       { currentState: 'q0', readChar: 'Y', nextState: 'busca_X', writeChar: 'Y', direction: 'R' },
       { currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
+      
+      // busca_X espera encontrar una 'X' saltándose las 'Y' para hacer el intercambio
       { currentState: 'busca_X', readChar: 'Y', nextState: 'busca_X', writeChar: 'Y', direction: 'R' },
-      { currentState: 'busca_X', readChar: 'X', nextState: 'retrocede', writeChar: 'Y', direction: 'L' },
+      { currentState: 'busca_X', readChar: 'X', nextState: 'intercambia', writeChar: 'Y', direction: 'L' },
       { currentState: 'busca_X', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
-      { currentState: 'retrocede', readChar: 'Y', nextState: 'cambia_A_X', writeChar: 'X', direction: 'L' },
-      { currentState: 'cambia_A_X', readChar: 'X', nextState: 'q0', writeChar: 'X', direction: 'R' },
-      { currentState: 'cambia_A_X', readChar: 'Y', nextState: 'q0', writeChar: 'Y', direction: 'R' }
+      
+      // retrocede un paso y cambia la 'Y' anterior por la 'X'
+      { currentState: 'intercambia', readChar: 'Y', nextState: 'regresa_inicio', writeChar: 'X', direction: 'L' },
+      
+      // Vuelve al inicio de la cinta (_) para reiniciar el escaneo de forma segura
+      { currentState: 'regresa_inicio', readChar: 'X', nextState: 'regresa_inicio', writeChar: 'X', direction: 'L' },
+      { currentState: 'regresa_inicio', readChar: 'Y', nextState: 'regresa_inicio', writeChar: 'Y', direction: 'L' },
+      { currentState: 'regresa_inicio', readChar: '_', nextState: 'q0', writeChar: '_', direction: 'R' }
     ]
   },
   parentesis_balanceados: {
     nombre: "🧮 PARÉNTESIS BALANCEADOS",
-    descripcion: "Verifica si los paréntesis de apertura y cierre están correctamente anidados eliminando los pares ( ).",
+    descripcion: "Verifica si los paréntesis están correctamente anidados eliminando los pares ( ).",
     inputPorDefecto: "(())",
     transiciones: [
+      // q0 busca el primer paréntesis de cierre ')'
       { currentState: 'q0', readChar: '(', nextState: 'q0', writeChar: '(', direction: 'R' },
       { currentState: 'q0', readChar: 'X', nextState: 'q0', writeChar: 'X', direction: 'R' },
       { currentState: 'q0', readChar: ')', nextState: 'busca_apertura', writeChar: 'X', direction: 'L' },
-      { currentState: 'q0', readChar: '_', nextState: 'verificar_limpio', writeChar: '_', direction: 'L' },
+      { currentState: 'q0', readChar: '_', nextState: 'ir_inicio', writeChar: '_', direction: 'L' },
+      
+      // busca hacia atrás el '(' más cercano para emparejarlo con una 'X'
       { currentState: 'busca_apertura', readChar: 'X', nextState: 'busca_apertura', writeChar: 'X', direction: 'L' },
       { currentState: 'busca_apertura', readChar: '(', nextState: 'q0', writeChar: 'X', direction: 'R' },
-      { currentState: 'verificar_limpio', readChar: 'X', nextState: 'verificar_limpio', writeChar: 'X', direction: 'L' },
+      
+      // Va al extremo izquierdo antes de validar toda la cinta
+      { currentState: 'ir_inicio', readChar: 'X', nextState: 'ir_inicio', writeChar: 'X', direction: 'L' },
+      { currentState: 'ir_inicio', readChar: '(', nextState: 'ir_inicio', writeChar: '(', direction: 'L' }, // Por si quedaron sin pareja
+      { currentState: 'ir_inicio', readChar: '_', nextState: 'verificar_limpio', writeChar: '_', direction: 'R' },
+      
+      // Recorre a la derecha; si solo hay 'X', acepta. Si encuentra un '(' colgado, no acepta.
+      { currentState: 'verificar_limpio', readChar: 'X', nextState: 'verificar_limpio', writeChar: 'X', direction: 'R' },
       { currentState: 'verificar_limpio', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' }
     ]
   },
@@ -73,24 +91,44 @@ const ALGORITMOS = {
     ]
   },
   el_palindromo: {
-    nombre: "🔄 DETECTOR DE PALÍNDROMOS UNIVERSAL",
-    descripcion: "Compara los extremos de la palabra uno a uno eliminándolos. ¡Soporta cualquier letra del alfabeto (A-Z) de forma dinámica!",
-    inputPorDefecto: "RECONOCER",
+    nombre: "🔄 DETECTOR DE PALÍNDROMOS (Alfabeto A, B, C)",
+    descripcion: "Compara los extremos de la palabra uno a uno eliminándolos. Diseñado bajo la lógica formal de Turing.",
+    inputPorDefecto: "ABCBA",
     transiciones: [
-      // 1. Lee el extremo izquierdo, lo borra (_) y salta a buscar su pareja al final
-      { currentState: 'q0', readChar: 'DINAMICO', nextState: 'busca_$', writeChar: '_', direction: 'R' },
+      // q0 lee el extremo izquierdo y recuerda qué letra era cambiando de estado
+      { currentState: 'q0', readChar: 'A', nextState: 'busca_A', writeChar: '_', direction: 'R' },
+      { currentState: 'q0', readChar: 'B', nextState: 'busca_B', writeChar: '_', direction: 'R' },
+      { currentState: 'q0', readChar: 'C', nextState: 'busca_C', writeChar: '_', direction: 'R' },
       { currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
 
-      // 2. Viaja a la derecha saltando cualquier letra hasta encontrar el espacio blanco
-      { currentState: 'busca_$', readChar: 'DINAMICO', nextState: 'busca_$', writeChar: '*', direction: 'R' },
-      { currentState: 'busca_$', readChar: '_', nextState: 'compara_$', writeChar: '_', direction: 'L' },
+      // Estado para cuando se empezó leyendo una 'A'
+      { currentState: 'busca_A', readChar: 'A', nextState: 'busca_A', writeChar: 'A', direction: 'R' },
+      { currentState: 'busca_A', readChar: 'B', nextState: 'busca_A', writeChar: 'B', direction: 'R' },
+      { currentState: 'busca_A', readChar: 'C', nextState: 'busca_A', writeChar: 'C', direction: 'R' },
+      { currentState: 'busca_A', readChar: '_', nextState: 'compara_A', writeChar: '_', direction: 'L' },
+      { currentState: 'compara_A', readChar: 'A', nextState: 'retorno', writeChar: '_', direction: 'L' },
+      { currentState: 'compara_A', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' }, // Caso impar
 
-      // 3. Compara si la letra del extremo derecho coincide con la guardada. Si sí, la borra
-      { currentState: 'compara_$', readChar: '$', nextState: 'retorno', writeChar: '_', direction: 'L' },
-      { currentState: 'compara_$', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' }, // Caso longitud impar
+      // Estado para cuando se empezó leyendo una 'B'
+      { currentState: 'busca_B', readChar: 'A', nextState: 'busca_B', writeChar: 'A', direction: 'R' },
+      { currentState: 'busca_B', readChar: 'B', nextState: 'busca_B', writeChar: 'B', direction: 'R' },
+      { currentState: 'busca_B', readChar: 'C', nextState: 'busca_B', writeChar: 'C', direction: 'R' },
+      { currentState: 'busca_B', readChar: '_', nextState: 'compara_B', writeChar: '_', direction: 'L' },
+      { currentState: 'compara_B', readChar: 'B', nextState: 'retorno', writeChar: '_', direction: 'L' },
+      { currentState: 'compara_B', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
 
-      // 4. Viaja a la izquierda saltando cualquier letra hasta el inicio para volver a empezar
-      { currentState: 'retorno', readChar: 'DINAMICO', nextState: 'retorno', writeChar: '*', direction: 'L' },
+      // Estado para cuando se empezó leyendo una 'C'
+      { currentState: 'busca_C', readChar: 'A', nextState: 'busca_C', writeChar: 'A', direction: 'R' },
+      { currentState: 'busca_C', readChar: 'B', nextState: 'busca_C', writeChar: 'B', direction: 'R' },
+      { currentState: 'busca_C', readChar: 'C', nextState: 'busca_C', writeChar: 'C', direction: 'R' },
+      { currentState: 'busca_C', readChar: '_', nextState: 'compara_C', writeChar: '_', direction: 'L' },
+      { currentState: 'compara_C', readChar: 'C', nextState: 'retorno', writeChar: '_', direction: 'L' },
+      { currentState: 'compara_C', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
+
+      // Viaja de regreso al extremo izquierdo para la siguiente ronda
+      { currentState: 'retorno', readChar: 'A', nextState: 'retorno', writeChar: 'A', direction: 'L' },
+      { currentState: 'retorno', readChar: 'B', nextState: 'retorno', writeChar: 'B', direction: 'L' },
+      { currentState: 'retorno', readChar: 'C', nextState: 'retorno', writeChar: 'C', direction: 'L' },
       { currentState: 'retorno', readChar: '_', nextState: 'q0', writeChar: '_', direction: 'R' }
     ]
   },
@@ -100,6 +138,7 @@ const ALGORITMOS = {
     inputPorDefecto: "F",
     transiciones: [
       { currentState: 'q0', readChar: 'F', nextState: 'expandir', writeChar: 'F', direction: 'R' },
+      { currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
       { currentState: 'expandir', readChar: '_', nextState: 'escribe_mas', writeChar: '+', direction: 'R' },
       { currentState: 'escribe_mas', readChar: '_', nextState: 'escribe_F', writeChar: 'F', direction: 'R' },
       { currentState: 'escribe_F', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' }
