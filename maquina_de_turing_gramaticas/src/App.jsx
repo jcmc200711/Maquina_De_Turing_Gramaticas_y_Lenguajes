@@ -91,12 +91,12 @@ const ALGORITMOS = {
     ]
   },
   el_palindromo: {
-    nombre: "🔄 DETECTOR DE PALÍNDROMOS UNIVERSAL (A, B, C, 0, 1)",
-    descripcion: "Compara los extremos de la palabra uno a uno eliminándolos. ¡Soporta de forma unificada las letras A, B, C y los bits 0, 1!",
-    inputPorDefecto: "A10BA01A",
+    nombre: "🔄 DETECTOR DE PALÍNDROMOS UNIVERSAL (A, B, C)",
+    descripcion: "Compara los extremos de la palabra uno a uno eliminándolos. ¡Soporta de forma unificada las letras A, B, C!",
+    inputPorDefecto: "ABBA",
     transiciones: (() => {
       // 🌟 Declaramos el alfabeto combinado que necesitas
-      const alfabeto = ["A", "B", "C", "0", "1"];
+      const alfabeto = ["A", "B", "C"];
       let t = [];
 
       // 1. Transiciones desde el estado inicial q0
