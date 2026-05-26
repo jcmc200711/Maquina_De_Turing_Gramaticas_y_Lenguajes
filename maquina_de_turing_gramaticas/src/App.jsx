@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-
+import { TuringDiagram } from './TuringDiagram.jsx';
 // BANCO DE ALGORITMOS PRECONFIGURADOS
 const ALGORITMOS = {
   suma_unaria: {
@@ -175,13 +175,11 @@ const styles = {
   header: { borderBottom: `2px solid ${C.cardBorder}`, paddingBottom: '16px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   headerTitle: { fontSize: '32px', fontWeight: '800', letterSpacing: '3px', background: `linear-gradient(90deg, ${C.neon}, ${C.green})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 },
   headerSub: { fontSize: '12px', color: C.textMid, letterSpacing: '2px', marginTop: '4px' },
-  
   glossaryGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' },
   glossaryCard: { background: `${C.card}bb`, border: `1px solid ${C.cardBorder}`, borderRadius: '8px', padding: '16px' },
   glossaryItem: { fontSize: '11px', marginBottom: '10px', lineHeight: '1.4' },
   glossaryTerm: { color: C.neon, fontWeight: '700' },
   chomskyTerm: { color: C.pink, fontWeight: '700' },
-
   grid: { display: 'grid', gridTemplateColumns: '380px 1fr', gap: '24px', marginBottom: '24px' },
   card: { background: C.card, border: `1px solid ${C.cardBorder}`, borderRadius: '8px', padding: '20px', position: 'relative', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' },
   sectionTitle: (color = C.neon) => ({ fontSize: '12px', fontWeight: '700', color, letterSpacing: '2px', marginBottom: '16px', textTransform: 'uppercase' }),
@@ -189,7 +187,6 @@ const styles = {
   selectAlgo: { width: '100%', background: '#040d1a', border: `2px solid ${C.neon}`, borderRadius: '6px', padding: '10px', color: C.neon, fontFamily: 'inherit', fontSize: '12px', fontWeight: '700', outline: 'none', marginBottom: '14px', cursor: 'pointer' },
   btnPrimary: { flex: 1, background: `linear-gradient(135deg, ${C.green}33, ${C.green}11)`, border: `2px solid ${C.green}`, borderRadius: '4px', color: C.green, fontFamily: 'inherit', fontSize: '11px', fontWeight: '800', padding: '10px', cursor: 'pointer', letterSpacing: '1px' },
   btnSecondary: { background: 'transparent', border: `1px solid ${C.cardBorder}`, borderRadius: '4px', color: C.textMid, fontFamily: 'inherit', fontSize: '11px', padding: '10px 16px', cursor: 'pointer' },
-  
   tapeWrap: { display: 'flex', alignItems: 'center', gap: '8px', overflowX: 'auto', padding: '35px 20px 35px', background: '#01040a', border: `2px solid ${C.cardBorder}`, borderRadius: '8px', boxShadow: 'inset 0 0 15px rgba(0,0,0,0.8)' },
   tapeCell: (isHead) => ({
     flexShrink: 0, width: '54px', height: '58px',
@@ -207,10 +204,7 @@ const styles = {
     color: dir === 'R' ? C.green : dir === 'L' ? C.neon : C.amber,
     textShadow: `0 0 8px ${dir === 'R' ? C.green : dir === 'L' ? C.neon : C.amber}`
   }),
-
   statusBadge: (status) => ({ padding: '6px 16px', borderRadius: '4px', fontSize: '12px', border: `2px solid ${status === 'accepted' ? C.green : status === 'rejected' ? C.pink : C.neon}`, color: status === 'accepted' ? C.green : status === 'rejected' ? C.pink : C.neon, fontWeight: '800', textShadow: `0 0 5px ${status==='accepted'?C.green:C.pink}` }),
-  
-  // Tabla Formal Estilo Grande
   table: { width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px', marginTop: '10px' },
   th: { borderBottom: `2px solid ${C.cardBorder}`, padding: '12px 16px', color: C.neon, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' },
   td: { padding: '12px 16px', borderBottom: `1px solid #041021`, fontFamily: 'monospace' }
@@ -235,14 +229,13 @@ export default function App() {
   const [stepCount, setStepCount] = useState(0);
   const [logs, setLogs] = useState([`// SYSTEM: algoritmo [SUMA_UNARIA] cargado correctamente.`]);
   const [lastMove, setLastMove] = useState({ dir: 'S', text: 'MÁQUINA INICIALIZADA EN POSICIÓN [2]' });
-  const [activeRuleIdx, setActiveRuleIdx] = useState(-1); // Rastrea cuál regla de la tabla se está aplicando justo ahora
+  const [activeRuleIdx, setActiveRuleIdx] = useState(-1); 
 
   const initMachine = useCallback((inputOpcional, transicionesOpcionales, idAlgoOpcional) => {
     const cadenaALeer = inputOpcional !== undefined ? inputOpcional : tapeInput;
     const listaTransiciones = transicionesOpcionales !== undefined ? transicionesOpcionales : transitions;
     const nombreAlgoritmo = idAlgoOpcional !== undefined ? idAlgoOpcional : algoritmoActual;
 
-    // 🌟 LA REPARACIÓN: Convertimos la cadena a mayúsculas antes de romperla en caracteres
     const t = cadenaALeer.toUpperCase().split(''); 
     
     setTape(['_', '_', ...(t.length ? t : ['_']), '_', '_']);
@@ -262,15 +255,12 @@ export default function App() {
     const currentChar = tape[headPosition] || '_';
     
     // --- 🌟 EL TRUCO DE LA VARIABLE DINÁMICA ---
-    // 1. Si estamos buscando o comparando, extraemos qué letra guardamos en el estado actual
-    let letraGuardada = null;
+    let letraGuardada = null; // Declaración en el ámbito de la función
     if (currentState.includes('_') && !currentState.endsWith('_')) {
-      letraGuardada = currentState.split('_')[1]; // Ej: de "busca_Z" extrae "Z"
+      letraGuardada = currentState.split('_')[1]; // ¡Corregido! Sin re-declarar let
     }
 
-    // 2. Buscamos una regla exacta o genérica
     let ruleIdx = transitions.findIndex(t => {
-      // Reemplazamos el comodín $ por la letra real que tiene la máquina en memoria
       const tState = t.currentState.replace('$', letraGuardada);
       const tRead = t.readChar === '$' ? letraGuardada : t.readChar;
       
@@ -293,14 +283,11 @@ export default function App() {
     const rule = transitions[ruleIdx];
     setActiveRuleIdx(ruleIdx);
 
-    // 3. Al transicionar, si el próximo estado tiene $, lo cambiamos por la letra leída actual
     let nextStateDinamico = rule.nextState;
     if (rule.nextState.includes('$')) {
-      // Si venimos de q0, la letra guardada es la que acabamos de leer
       const letraAFormatear = letraGuardada || currentChar;
       nextStateDinamico = rule.nextState.replace('$', letraAFormatear);
     }
-    // ---------------------------------------------
 
     const newTape = [...tape];
     const charAQuedar = rule.writeChar === '*' ? currentChar : rule.writeChar;
@@ -316,7 +303,7 @@ export default function App() {
 
     setTape(newTape);
     setHeadPosition(pos);
-    setCurrentState(nextStateDinamico); // 🌟 Usamos el estado dinámico procesado
+    setCurrentState(nextStateDinamico); 
     setStepCount(p => p + 1);
     
     const dirTexto = rule.direction === 'R' ? `DERECHA (→) de pos ${antiguaPosicion} a pos ${pos}` : rule.direction === 'L' ? `IZQUIERDA (←) de pos ${antiguaPosicion} a pos ${pos}` : `STAY (•) en pos ${pos}`;
@@ -350,93 +337,53 @@ export default function App() {
 
           {/* DOS GLOSARIOS FORMALES COLAPSABLES */}
           <div style={styles.glossaryGrid}>
-            
-            {/* PANEL: ELEMENTOS DE LA MÁQUINA DE TURING */}
             <div style={styles.glossaryCard}>
-              {/* CABECERA CLICKABLE */}
               <div 
-                style={{ ...styles.sectionTitle(C.neon), cursor: 'pointer', display: 'flex', justifyContent: 'between', alignItems: 'center', userSelect: 'none' }}
+                style={{ ...styles.sectionTitle(C.neon), cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', userSelect: 'none' }}
                 onClick={() => setGlosarioTuringAbierto(!glosarioTuringAbierto)}
               >
                 <span>📋 ELEMENTOS FORMALES DE LA MÁQUINA DE TURING M = {"⟨Q, Σ, Γ, δ, q0, B, F⟩"}</span>
                 <span style={{ marginLeft: '10px', color: C.neon }}>{glosarioTuringAbierto ? '▼' : '►'}</span>
               </div>
               
-              {/* CONTENIDO DESPLEGABLE */}
               {glosarioTuringAbierto && (
                 <div style={{ marginTop: '12px', borderTop: `1px dashed ${C.cardBorder}`, paddingTop: '10px' }}>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.glossaryTerm}>Q (Conjunto Finito de Estados):</span> Es el "cerebro" o la memoria interna del procesador de control. Representa todas las situaciones lógicas posibles en las que el autómata puede encontrarse en un instante dado.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.glossaryTerm}>Σ (Alfabeto de Entrada):</span> El conjunto finito de símbolos válidos y permitidos que el usuario puede escribir en la cinta *antes* de iniciar la computación. **Restricción formal:** {"(Σ ∩ {B} = ∅)"}.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.glossaryTerm}>Γ (Alfabeto de la Cinta):</span> El superconjunto de caracteres legibles y escribibles en la cinta. Contiene a todo el alfabeto de entrada y añade símbolos de trabajo {"(Σ ⊂ Γ)"}.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.glossaryTerm}>B o _ (Símbolo Blanco / Blank):</span> Representa una celda vacía en la cinta. Al inicio, delimita los bordes de la cadena de entrada y se extiende infinitamente proveyendo memoria ilimitada.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.glossaryTerm}>δ (Función de Transición):</span> El mapeo matemático detallado como {"δ: Q × Γ → Q × Γ × {L, R, S}"}. Determina el nuevo estado, qué escribir y hacia dónde mover el cabezal.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.glossaryTerm}>q0 (Estado Inicial):</span> Es el estado único del conjunto Q {"(q0 ∈ Q)"} donde la Unidad de Control de la máquina se posiciona de forma automática al iniciar.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.glossaryTerm}>F o q_accept (Conjunto de Estados Finales):</span> Subconjunto de estados {"(F ⊆ Q)"} que determinan la detención exitosa del sistema (la cadena pertenece al lenguaje).
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.glossaryTerm}>Cabezal de Lectura/Escritura:</span> El puntero físico-lógico de acceso a la cinta. Apunta a una sola celda a la vez, lee, edita y se desplaza.
-                  </div>
+                  <div style={styles.glossaryItem}><span style={styles.glossaryTerm}>Q (Conjunto Finito de Estados):</span> Es el "cerebro" o la memoria interna del procesador de control.</div>
+                  {/* 🌟 CORRECCIÓN: Envolvemos el conjunto con comillas para evitar el error 'B is not defined' */}
+                  <div style={styles.glossaryItem}><span style={styles.glossaryTerm}>Σ (Alfabeto de Entrada):</span> Símbolos permitidos antes de iniciar la computación. Restricción: {"(Σ ∩ {B} = ∅)"}.</div>
+                  <div style={styles.glossaryItem}><span style={styles.glossaryTerm}>Γ (Alfabeto de la Cinta):</span> El superconjunto de caracteres legibles y escribibles (Σ ⊂ Γ).</div>
+                  <div style={styles.glossaryItem}><span style={styles.glossaryTerm}>B o _ (Símbolo Blanco / Blank):</span> Celda vacía que provee memoria ilimitada.</div>
+                  {/* 🌟 CORRECCIÓN: Envolvemos las direcciones entre comillas para evitar el error 'L is not defined' */}
+                  <div style={styles.glossaryItem}><span style={styles.glossaryTerm}>δ (Función de Transición):</span> Mapeo δ: Q × Γ → Q × Γ × {"{'L', 'R', 'S'}"}.</div>
+                  <div style={styles.glossaryItem}><span style={styles.glossaryTerm}>q0 (Estado Inicial):</span> Estado donde se posiciona el control de forma automática.</div>
+                  <div style={styles.glossaryItem}><span style={styles.glossaryTerm}>F o q_accept (Estados Finales):</span> Determinan la detención exitosa del sistema.</div>
                 </div>
               )}
             </div>
 
-            {/* PANEL: JERARQUÍA DE CHOMSKY */}
             <div style={styles.glossaryCard}>
-              {/* CABECERA CLICKABLE */}
               <div 
-                style={{ ...styles.sectionTitle(C.pink), cursor: 'pointer', display: 'flex', justifyContent: 'between', alignItems: 'center', userSelect: 'none' }}
+                style={{ ...styles.sectionTitle(C.pink), cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', userSelect: 'none' }}
                 onClick={() => setGlosarioChomskyAbierto(!glosarioChomskyAbierto)}
               >
-                <span>🏛️ JERARQUÍA DE CHOMSKY (Clasificación de Lenguajes y Autómatas)</span>
+                <span>🏛️ JERARQUÍA DE CHOMSKY (Clasificación de Lenguajes)</span>
                 <span style={{ marginLeft: '10px', color: C.pink }}>{glosarioChomskyAbierto ? '▼' : '►'}</span>
               </div>
               
-              {/* CONTENIDO DESPLEGABLE */}
               {glosarioChomskyAbierto && (
                 <div style={{ marginTop: '12px', borderTop: `1px dashed ${C.cardBorder}`, paddingTop: '10px' }}>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.chomskyTerm}>Tipo 0 (Gramáticas No Restringidas / Lenguajes Recursivamente Enumerables):</span> 
-                    Reconocidas universalmente por las **Máquinas de Turing**. No poseen restricciones en sus reglas de producción de cadenas {"(α → β)"}. Modelan cualquier problema computable.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.chomskyTerm}>Tipo 1 (Gramáticas Sensibles al Contexto / Lenguajes Sensibles al Contexto):</span> 
-                    Reconocidas por **Autómatas Linealmente Acotados (LBA)**. La longitud de la cadena sustituida debe ser mayor o igual a la original {"(|α| ≤ |β|)"}. Espacio limitado al input.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.chomskyTerm}>Tipo 2 (Gramáticas Libres de Contexto / Lenguajes Independientes del Contexto):</span> 
-                    Reconocidas por los **Autómatas de Pila (PDA)**. Sustituyen un único símbolo no-terminal {"(A → β)"}. Utilizan una memoria auxiliar tipo LIFO (Pila) para balanceos y sintaxis.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.chomskyTerm}>Tipo 3 (Gramáticas Regulares / Lenguajes Regulares):</span> 
-                    Reconocidas por los **Autómatas Finitos (AFD / AFND)**. Carecen por completo de memoria dinámica externa; solo transicionan entre estados rígidos. Usados en Regex y análisis léxico.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={{ color: C.amber, fontWeight: '700' }}>Inclusión de Conjuntos Formales:</span> 
-                    Cumplen un orden jerárquico estricto de contención: {"Tipo 3 ⊂ Tipo 2 ⊂ Tipo 1 ⊂ Tipo 0"}. Todo lenguaje regular es libre de contexto, y todos ellos pueden ser resueltos por tu Máquina de Turing.
-                  </div>
+                  <div style={styles.glossaryItem}><span style={styles.chomskyTerm}>Tipo 0 (Gramáticas No Restringidas):</span> Reconocidas por las Máquinas de Turing.</div>
+                  <div style={styles.glossaryItem}><span style={styles.chomskyTerm}>Tipo 1 (Sensibles al Contexto):</span> Reconocidas por Autómatas Linealmente Acotados (LBA).</div>
+                  <div style={styles.glossaryItem}><span style={styles.chomskyTerm}>Tipo 2 (Libres de Contexto):</span> Reconocidas por los Autómatas de Pila (PDA).</div>
+                  <div style={styles.glossaryItem}><span style={styles.chomskyTerm}>Tipo 3 (Regulares):</span> Reconocidas por los Autómatas Finitos (AFD/AFND).</div>
                 </div>
               )}
             </div>
-
           </div>
 
-          {/* INTERFAZ PRINCIPAL EN DOS COLUMNAS */}
+          {/* INTERFAZ PRINCIPAL */}
           <div style={styles.grid}>
-            
-            {/* PANEL IZQUIERDO DE CONTROL */}
+            {/* PANEL IZQUIERDO */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={styles.card}>
                 <div style={styles.sectionTitle(C.neon)}>🛠️ CARGAR LÓGICA DE COMPUTACIÓN</div>
@@ -477,14 +424,13 @@ export default function App() {
                 </div>
               </div>
               
-              {/* MINI RASTREADOR REUBICADO */}
               <div style={{...styles.card, padding: '12px 20px', borderLeft: `3px solid ${C.amber}`}}>
                 <div style={{fontSize: '9px', color: C.textDim, letterSpacing: '1px'}}>ÚLTIMO MOVIMIENTO CABEZAL</div>
                 <div style={{fontSize: '11px', fontWeight: 'bold', color: '#fff', marginTop: '2px'}}>{lastMove.text}</div>
               </div>
             </div>
 
-            {/* PANEL DERECHO: MONITOR DE CINTA Y CONSOLA */}
+            {/* PANEL DERECHO */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={styles.card}>
                 <div style={styles.sectionTitle(C.textMid)}>◈ MONITOR DE TRABAJO DE CINTA FIJA (Γ)</div>
@@ -522,7 +468,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* LOGS / CONSOLA */}
               <div style={styles.card}>
                 <div style={{ fontSize: '10px', color: C.textDim, marginBottom: '6px', letterSpacing: '1px' }}>CONSOLE_OUTPUT // REGISTRO DE TRABAJO δ</div>
                 <div style={{ background: '#01050f', padding: '12px', height: '110px', overflowY: 'auto', fontSize: '12px', borderRadius: '4px', border: `1px solid ${C.cardBorder}` }}>
@@ -532,7 +477,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* NUEVO PANEL EXTENDIDO GIGANTE: TABLA DE TRANSICIONES FORMAL (δ) */}
+          {/* MATRIZ DE TRANSICIÓN */}
           <div style={styles.card}>
             <div style={styles.sectionTitle(C.green)}>💻 MATRIZ FORMAL DE LA FUNCIÓN DE TRANSICIÓN δ (ALGORITMO ACTUAL)</div>
             <div style={{ overflowX: 'auto' }}>
@@ -554,6 +499,7 @@ export default function App() {
                     return (
                       <tr 
                         key={idx} 
+                        id={`fila-transicion-${idx}`}
                         style={{ 
                           background: isRowActive ? `${C.green}15` : 'transparent',
                           transition: 'background 0.2s ease',
@@ -579,36 +525,25 @@ export default function App() {
             </div>
           </div>
 
+          {/* DIAGRAMA INTERACTIVO SINCRONIZADO */}
+          <TuringDiagram 
+            algoritmoActual={ALGORITMOS[algoritmoActual]}
+            estadoActual={currentState}
+            transicionEjecutadaIndex={activeRuleIdx}
+          />
         </div>
       </div>
       
-      {/* Estilos inyectados seguros con soporte para scrollbars neón */}
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes bounce {
           from { transform: translateY(0); }
           to { transform: translateY(4px); }
         }
-
-        ::-webkit-scrollbar {
-          width: 6px;
-          height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-          background: #01040a;
-          border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: #00ffff33;
-          border: 1px solid #00ffff;
-          border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: #00ffff66;
-        }
-        * {
-          scrollbar-width: thin;
-          scrollbar-color: #00ffff33 #01040a;
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #01040a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #00ffff33; border: 1px solid #00ffff; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00ffff66; }
+        * { scrollbar-width: thin; scrollbar-color: #00ffff33 #01040a; }
       `}} />
     </>
   );
