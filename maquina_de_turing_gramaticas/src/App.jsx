@@ -91,46 +91,42 @@ const ALGORITMOS = {
     ]
   },
   el_palindromo: {
-    nombre: "🔄 DETECTOR DE PALÍNDROMOS (Alfabeto A, B, C)",
-    descripcion: "Compara los extremos de la palabra uno a uno eliminándolos. Diseñado bajo la lógica formal de Turing.",
-    inputPorDefecto: "ABCBA",
-    transiciones: [
-      // q0 lee el extremo izquierdo y recuerda qué letra era cambiando de estado
-      { currentState: 'q0', readChar: 'A', nextState: 'busca_A', writeChar: '_', direction: 'R' },
-      { currentState: 'q0', readChar: 'B', nextState: 'busca_B', writeChar: '_', direction: 'R' },
-      { currentState: 'q0', readChar: 'C', nextState: 'busca_C', writeChar: '_', direction: 'R' },
-      { currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
+    nombre: "🔄 DETECTOR DE PALÍNDROMOS UNIVERSAL (A-Z)",
+    descripcion: "Compara los extremos de la palabra uno a uno eliminándolos. ¡Soporta dinámicamente cualquier letra de la A a la Z!",
+    inputPorDefecto: "RECONOCER",
+    transiciones: (() => {
+      const alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+      let t = [];
 
-      // Estado para cuando se empezó leyendo una 'A'
-      { currentState: 'busca_A', readChar: 'A', nextState: 'busca_A', writeChar: 'A', direction: 'R' },
-      { currentState: 'busca_A', readChar: 'B', nextState: 'busca_A', writeChar: 'B', direction: 'R' },
-      { currentState: 'busca_A', readChar: 'C', nextState: 'busca_A', writeChar: 'C', direction: 'R' },
-      { currentState: 'busca_A', readChar: '_', nextState: 'compara_A', writeChar: '_', direction: 'L' },
-      { currentState: 'compara_A', readChar: 'A', nextState: 'retorno', writeChar: '_', direction: 'L' },
-      { currentState: 'compara_A', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' }, // Caso impar
+      // 1. Transiciones desde el estado inicial q0
+      alfabeto.forEach(letra => {
+        t.push({ currentState: 'q0', readChar: letra, nextState: `busca_${letra}`, writeChar: '_', direction: 'R' });
+      });
+      t.push({ currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' });
 
-      // Estado para cuando se empezó leyendo una 'B'
-      { currentState: 'busca_B', readChar: 'A', nextState: 'busca_B', writeChar: 'A', direction: 'R' },
-      { currentState: 'busca_B', readChar: 'B', nextState: 'busca_B', writeChar: 'B', direction: 'R' },
-      { currentState: 'busca_B', readChar: 'C', nextState: 'busca_B', writeChar: 'C', direction: 'R' },
-      { currentState: 'busca_B', readChar: '_', nextState: 'compara_B', writeChar: '_', direction: 'L' },
-      { currentState: 'compara_B', readChar: 'B', nextState: 'retorno', writeChar: '_', direction: 'L' },
-      { currentState: 'compara_B', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
+      // 2. Generación dinámica de estados de búsqueda y comparación por cada letra
+      alfabeto.forEach(letraActual => {
+        // En el estado busca_LETRA, salta cualquier otra letra moviéndose a la derecha
+        alfabeto.forEach(letraSalto => {
+          t.push({ currentState: `busca_${letraActual}`, readChar: letraSalto, nextState: `busca_${letraActual}`, writeChar: letraSalto, direction: 'R' });
+        });
+        // Cuando encuentra el espacio en blanco al final, retrocede un paso para comparar
+        t.push({ currentState: `busca_${letraActual}`, readChar: '_', nextState: `compara_${letraActual}`, writeChar: '_', direction: 'L' });
 
-      // Estado para cuando se empezó leyendo una 'C'
-      { currentState: 'busca_C', readChar: 'A', nextState: 'busca_C', writeChar: 'A', direction: 'R' },
-      { currentState: 'busca_C', readChar: 'B', nextState: 'busca_C', writeChar: 'B', direction: 'R' },
-      { currentState: 'busca_C', readChar: 'C', nextState: 'busca_C', writeChar: 'C', direction: 'R' },
-      { currentState: 'busca_C', readChar: '_', nextState: 'compara_C', writeChar: '_', direction: 'L' },
-      { currentState: 'compara_C', readChar: 'C', nextState: 'retorno', writeChar: '_', direction: 'L' },
-      { currentState: 'compara_C', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
+        // Si la letra del extremo derecho coincide con la que buscamos, la borra y regresa
+        t.push({ currentState: `compara_${letraActual}`, readChar: letraActual, nextState: 'retorno', writeChar: '_', direction: 'L' });
+        // Caso especial: si es de longitud impar, se cruzará con un espacio vacío
+        t.push({ currentState: `compara_${letraActual}`, readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' });
+      });
 
-      // Viaja de regreso al extremo izquierdo para la siguiente ronda
-      { currentState: 'retorno', readChar: 'A', nextState: 'retorno', writeChar: 'A', direction: 'L' },
-      { currentState: 'retorno', readChar: 'B', nextState: 'retorno', writeChar: 'B', direction: 'L' },
-      { currentState: 'retorno', readChar: 'C', nextState: 'retorno', writeChar: 'C', direction: 'L' },
-      { currentState: 'retorno', readChar: '_', nextState: 'q0', writeChar: '_', direction: 'R' }
-    ]
+      // 3. Estado de retorno al extremo izquierdo saltando cualquier letra
+      alfabeto.forEach(letraSalto => {
+        t.push({ currentState: 'retorno', readChar: letraSalto, nextState: 'retorno', writeChar: letraSalto, direction: 'L' });
+      });
+      t.push({ currentState: 'retorno', readChar: '_', nextState: 'q0', writeChar: '_', direction: 'R' });
+
+      return t;
+    })()
   },
   generador_fractales: {
     nombre: "🌿 GENERADOR DE FRACTALES (L-System)",
@@ -145,15 +141,24 @@ const ALGORITMOS = {
     ]
   },
   elementos_sumas: {
-    nombre: "📊 IDENTIFICADOR DE ELEMENTOS DE SUMA",
-    descripcion: "Analiza sintácticamente la ecuación reconociendo los sumandos (S) y los operadores (+).",
-    inputPorDefecto: "5+7",
-    transiciones: [
-      { currentState: 'q0', readChar: '5', nextState: 'q0', writeChar: 'S', direction: 'R' },
-      { currentState: 'q0', readChar: '7', nextState: 'q0', writeChar: 'S', direction: 'R' },
-      { currentState: 'q0', readChar: '+', nextState: 'q0', writeChar: '+', direction: 'R' },
-      { currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' }
-    ]
+    nombre: "📊 IDENTIFICADOR DE ELEMENTOS DE SUMA UNIVERSAL",
+    descripcion: "Analiza sintácticamente la ecuación reconociendo todos los dígitos numéricos como sumandos (S) y los operadores (+).",
+    inputPorDefecto: "123+456",
+    transiciones: (() => {
+      let t = [];
+      const digitos = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+
+      // Genera una regla para cada número posible del 0 al 9
+      digitos.forEach(digito => {
+        t.push({ currentState: 'q0', readChar: digito, nextState: 'q0', writeChar: 'S', direction: 'R' });
+      });
+
+      // Mantiene el operador más y el fin de cadena
+      t.push({ currentState: 'q0', readChar: '+', nextState: 'q0', writeChar: '+', direction: 'R' });
+      t.push({ currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' });
+
+      return t;
+    })()
   }
 };
 
