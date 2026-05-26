@@ -92,7 +92,6 @@ const ALGORITMOS = {
     nombre: "➕ SUMA UNARIA (111 + 11)",
     descripcion: "Suma números en base 1 (donde 3 es '111' y 2 es '11'). Une los bloques de '1' eliminando el signo '+'.",
     inputPorDefecto: "111+11",
-    diagrama: "https://quickchart.io/graphviz?format=png&graph=digraph{rankdir=LR;node[shape=circle,color=%22%2300ffff%22,fontcolor=white];edge[color=%22%23ff007f%22,fontcolor=white];q0->q0[label=%221/1,R%22];q0->busca_final[label=%22%2B/1,R%22];busca_final->busca_final[label=%221/1,R%22];busca_final->borra_ultimo[label=%22_/_,L%22];borra_ultimo->q_accept[label=%221/_,S%22];q_accept[shape=doublecircle,color=%22%2339ff14%22];}",
     transiciones: [
       { currentState: 'q0', readChar: '1', nextState: 'q0', writeChar: '1', direction: 'R' },
       { currentState: 'q0', readChar: '+', nextState: 'busca_final', writeChar: '1', direction: 'R' },
@@ -104,11 +103,9 @@ const ALGORITMOS = {
 
   encriptado_cesar: {
     nombre: "🔐 ENCRIPTADO JULIO CÉSAR UNIVERSAL (Shift +1)",
-    descripcion: "¡CORREGIDO! Desplaza dinámicamente cualquier carácter del alfabeto una posición adelante (A→B, Z→A) usando aritmética modular en JS.",
+    descripcion: "Desplaza dinámicamente cualquier carácter del alfabeto una posición adelante (A→B, Z→A) usando aritmética modular en conjunto con el procesador dinámico.",
     inputPorDefecto: "ZURICH",
-    diagrama: "https://quickchart.io/graphviz?format=png&graph=digraph{rankdir=LR;node[shape=circle,color=%22%2300ffff%22,fontcolor=white];edge[color=%22%23ff007f%22,fontcolor=white];q0->q0[label=%22[A-Z]/Siguiente,R%22];q0->q_accept[label=%22_/_,S%22];q_accept[shape=doublecircle,color=%22%2339ff14%22];}",
     transiciones: [
-      // 🌟 Exclusivo: Usa el interceptor DINAMICO de stepExecution para procesar todo el alfabeto en una sola regla
       { currentState: 'q0', readChar: 'DINAMICO', nextState: 'q0', writeChar: 'SIGUIENTE_CESAR', direction: 'R' },
       { currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' }
     ]
@@ -116,11 +113,9 @@ const ALGORITMOS = {
 
   ejemplo_tribus: {
     nombre: "⛺ ALGORITMO DE LAS TRIBUS (Bubble Sort Binario)",
-    descripcion: "¡REPARADO! Ordena la cinta segregando las 'X' a la izquierda y las 'Y' a la derecha mediante un método de burbuja exhaustivo sin bucles infinitos.",
+    descripcion: "Ordena la cinta segregando las 'X' a la izquierda y las 'Y' a la derecha mediante un método de burbuja exhaustivo que reinicia el escaneo tras cada intercambio.",
     inputPorDefecto: "YXXYXY",
-    diagrama: "https://quickchart.io/graphviz?format=png&graph=digraph{rankdir=LR;node[shape=circle,color=%22%2300ffff%22,fontcolor=white];edge[color=%22%23ff007f%22,fontcolor=white];q0->q0[label=%22X/X,R%22];q0->busca_X[label=%22Y/Y,R%22];q0->q_accept[label=%22_/_,S%22];busca_X->busca_X[label=%22Y/Y,R%22];busca_X->retrocede[label=%22X/Y,L%22];busca_X->q_accept[label=%22_/_,S%22];retrocede->cambia_A_X[label=%22Y/X,L%22];cambia_A_X->q0[label=%22X/X,R%22];cambia_A_X->q0[label=%22Y/Y,R%22];q_accept[shape=doublecircle,color=%22%2339ff14%22];}",
     transiciones: [
-      // Algoritmo reparado para forzar reinicio tras un intercambio físico en la cinta
       { currentState: 'q0', readChar: 'X', nextState: 'q0', writeChar: 'X', direction: 'R' },
       { currentState: 'q0', readChar: 'Y', nextState: 'busca_Y', writeChar: 'Y', direction: 'R' },
       { currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
@@ -141,7 +136,6 @@ const ALGORITMOS = {
     nombre: "🧮 PARÉNTESIS BALANCEADOS",
     descripcion: "Verifica si los paréntesis de apertura y cierre están correctamente anidados eliminando los pares ( ).",
     inputPorDefecto: "(())",
-    diagrama: "https://quickchart.io/graphviz?format=png&graph=digraph{rankdir=LR;node[shape=circle,color=%22%2300ffff%22,fontcolor=white];edge[color=%22%23ff007f%22,fontcolor=white];q0->q0[label=%22(/%20(,X/X,R%22];q0->busca_apertura[label=%22)/X,L%22];q0->verificar_limpio[label=%22_/_,L%22];busca_apertura->busca_apertura[label=%22X/X,L%22];busca_apertura->q0[label=%22(/X,R%22];verificar_limpio->verificar_limpio[label=%22X/X,L%22];verificar_limpio->q_accept[label=%22_/_,S%22];q_accept[shape=doublecircle,color=%22%2339ff14%22];}",
     transiciones: [
       { currentState: 'q0', readChar: '(', nextState: 'q0', writeChar: '(', direction: 'R' },
       { currentState: 'q0', readChar: 'X', nextState: 'q0', writeChar: 'X', direction: 'R' },
@@ -158,7 +152,6 @@ const ALGORITMOS = {
     nombre: "🔢 CONTADOR BINARIO (+1)",
     descripcion: "Suma 1 a cualquier número binario. Se mueve al final y viaja hacia atrás aplicando el acarreo de bits.",
     inputPorDefecto: "1011",
-    diagrama: "https://quickchart.io/graphviz?format=png&graph=digraph{rankdir=LR;node[shape=circle,color=%22%2300ffff%22,fontcolor=white];edge[color=%22%23ff007f%22,fontcolor=white];q0->q0[label=%221/1,0/0,R%22];q0->acarreo[label=%22_/_,L%22];acarreo->acarreo[label=%221/0,L%22];acarreo->retorno[label=%220/1,_/1,L%22];retorno->retorno[label=%221/1,0/0,L%22];retorno->q_accept[label=%22_/_,R%22];q_accept[shape=doublecircle,color=%22%2339ff14%22];}",
     transiciones: [
       { currentState: 'q0', readChar: '1', nextState: 'q0', writeChar: '1', direction: 'R' },
       { currentState: 'q0', readChar: '0', nextState: 'q0', writeChar: '0', direction: 'R' },
@@ -176,7 +169,6 @@ const ALGORITMOS = {
     nombre: "🔄 DETECTOR DE PALÍNDROMOS UNIVERSAL",
     descripcion: "Compara los extremos de la palabra uno a uno eliminándolos. ¡Soporta cualquier letra del alfabeto (A-Z) de forma dinámica!",
     inputPorDefecto: "RECONOCER",
-    diagrama: "https://quickchart.io/graphviz?format=png&graph=digraph{rankdir=LR;node[shape=circle,color=%22%2300ffff%22,fontcolor=white];edge[color=%22%23ff007f%22,fontcolor=white];q0->busca_sig[label=%22α/_,R%22];q0->q_accept[label=%22_/_,S%22];busca_sig->busca_sig[label=%22β/β,R%22];busca_sig->compara_sig[label=%22_/_,L%22];compara_sig->retorno[label=%22α/_,L%22];compara_sig->q_accept[label=%22_/_,S%22];retorno->retorno[label=%22β/β,L%22];retorno->q0[label=%22_/_,R%22];q_accept[shape=doublecircle,color=%22%2339ff14%22];}",
     transiciones: [
       { currentState: 'q0', readChar: 'DINAMICO', nextState: 'busca_$', writeChar: '_', direction: 'R' },
       { currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
@@ -193,7 +185,6 @@ const ALGORITMOS = {
     nombre: "🌿 GENERADOR DE FRACTALES (L-System)",
     descripcion: "Aplica reglas de reescritura de fractales de texto. Aquí expande el axioma 'F' usando la regla clásica F → F+F.",
     inputPorDefecto: "F",
-    diagrama: "https://quickchart.io/graphviz?format=png&graph=digraph{rankdir=LR;node[shape=circle,color=%22%2300ffff%22,fontcolor=white];edge[color=%22%23ff007f%22,fontcolor=white];q0->expandir[label=%22F/F,R%22];expandir->escribe_mas[label=%22_/%2B,R%22];escribe_mas->escribe_F[label=%22_/F,R%22];escribe_F->q_accept[label=%22_/_,S%22];q_accept[shape=doublecircle,color=%22%2339ff14%22];}",
     transiciones: [
       { currentState: 'q0', readChar: 'F', nextState: 'expandir', writeChar: 'F', direction: 'R' },
       { currentState: 'expandir', readChar: '_', nextState: 'escribe_mas', writeChar: '+', direction: 'R' },
@@ -206,7 +197,6 @@ const ALGORITMOS = {
     nombre: "📊 IDENTIFICADOR DE ELEMENTOS DE SUMA",
     descripcion: "Analiza sintácticamente la ecuación reconociendo los sumandos (S) y los operadores (+).",
     inputPorDefecto: "5+7",
-    diagrama: "https://quickchart.io/graphviz?format=png&graph=digraph{rankdir=LR;node[shape=circle,color=%22%2300ffff%22,fontcolor=white];edge[color=%22%23ff007f%22,fontcolor=white];q0->q0[label=%225/S,7/S,%2B/%2B,R%22];q0->q_accept[label=%22_/_,S%22];q_accept[shape=doublecircle,color=%22%2339ff14%22];}",
     transiciones: [
       { currentState: 'q0', readChar: '5', nextState: 'q0', writeChar: 'S', direction: 'R' },
       { currentState: 'q0', readChar: '7', nextState: 'q0', writeChar: 'S', direction: 'R' },
