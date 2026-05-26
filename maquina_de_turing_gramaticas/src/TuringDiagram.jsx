@@ -178,7 +178,10 @@ export const TuringDiagram = ({ algoritmoActual, estadoActual, transicionEjecuta
         cyRef.current = null;
       }
     };
-  }, [algoritmoActual]); // Quitamos estados de animación de aquí para evitar re-renderizados infinitos
+    // 🌟 SOLUCIÓN: Colocar el deshabilitador de ESLint aquí mismo, justo antes del array de dependencias.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [algoritmoActual]); 
+
 
   // --- EFECTO 3: Iluminación reactiva paso a paso ---
   useEffect(() => {
