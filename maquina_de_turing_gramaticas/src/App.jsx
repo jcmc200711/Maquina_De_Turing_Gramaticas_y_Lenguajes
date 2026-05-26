@@ -44,7 +44,9 @@ const ALGORITMOS = {
       { currentState: 'busca_X', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
       { currentState: 'retrocede', readChar: 'Y', nextState: 'cambia_A_X', writeChar: 'X', direction: 'L' },
       { currentState: 'cambia_A_X', readChar: 'X', nextState: 'q0', writeChar: 'X', direction: 'R' },
-      { currentState: 'cambia_A_X', readChar: 'Y', nextState: 'q0', writeChar: 'Y', direction: 'R' }
+      { currentState: 'cambia_A_X', readChar: 'Y', nextState: 'q0', writeChar: 'Y', direction: 'R' },
+      // 👇 REGLA SALVADORA: Si retrocede tanto que choca con el borde blanco izquierdo, rebota a la derecha hacia q0
+      { currentState: 'cambia_A_X', readChar: '_', nextState: 'q0', writeChar: '_', direction: 'R' } 
     ]
   },
   parentesis_balanceados: {
