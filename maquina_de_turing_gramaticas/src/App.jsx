@@ -91,7 +91,7 @@ const ALGORITMOS = {
     ]
   },
   el_palindromo: {
-    nombre: "🔄 DETECTOR DE PALÍNDROMOS UNIVERSAL (A, B, C)",
+    nombre: "🔄 DETECTOR DE PALÍNDROMOS (A, B, C)",
     descripcion: "Compara los extremos de la palabra uno a uno eliminándolos. ¡Soporta de forma unificada las letras A, B, C!",
     inputPorDefecto: "ABBA",
     transiciones: (() => {
