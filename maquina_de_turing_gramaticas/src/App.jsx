@@ -19,15 +19,9 @@ const ALGORITMOS = {
     descripcion: "Cifra un texto desplazando cada letra una posición adelante en el abecedario (A→B, B→C, C→A).",
     inputPorDefecto: "ABCBA",
     transiciones: [
-      // Mapeo explícito y formal para cada letra del alfabeto definido
       { currentState: 'q0', readChar: 'A', nextState: 'q0', writeChar: 'B', direction: 'R' },
       { currentState: 'q0', readChar: 'B', nextState: 'q0', writeChar: 'C', direction: 'R' },
       { currentState: 'q0', readChar: 'C', nextState: 'q0', writeChar: 'A', direction: 'R' },
-      { currentState: 'q0', readChar: 'R', nextState: 'q0', writeChar: 'S', direction: 'R' },
-      { currentState: 'q0', readChar: 'E', nextState: 'q0', writeChar: 'F', direction: 'R' },
-      { currentState: 'q0', nextChar: 'C', nextState: 'q0', writeChar: 'D', direction: 'R' },
-      { currentState: 'q0', readChar: 'O', nextState: 'q0', writeChar: 'P', direction: 'R' },
-      { currentState: 'q0', readChar: 'N', nextState: 'q0', writeChar: 'O', direction: 'R' },
       { currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' }
     ]
   },
@@ -36,28 +30,15 @@ const ALGORITMOS = {
     descripcion: "Ordenamiento: Separa dos tribus rivales (X e Y) mezcladas en la cinta, moviendo los miembros 'X' a la izquierda.",
     inputPorDefecto: "YXXYXY",
     transiciones: [
-      // 1. Escaneo desde el inicio (q0)
       { currentState: 'q0', readChar: 'X', nextState: 'q0', writeChar: 'X', direction: 'R' },
       { currentState: 'q0', readChar: 'Y', nextState: 'busca_X', writeChar: 'Y', direction: 'R' },
-      // ¡Única condición de aceptación real!: q0 llegó al final sin dejar Ys colgadas atrás
       { currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
-
-      // 2. Estado de búsqueda
       { currentState: 'busca_X', readChar: 'Y', nextState: 'busca_X', writeChar: 'Y', direction: 'R' },
       { currentState: 'busca_X', readChar: 'X', nextState: 'retrocede', writeChar: 'Y', direction: 'L' },
-      // Si busca_X llega al final, NO acepta. Viaja a la izquierda a resetear el ciclo
-      { currentState: 'busca_X', readChar: '_', nextState: 'retorno_final', writeChar: '_', direction: 'L' },
-
-      // 3. Mecanismo de intercambio local
+      { currentState: 'busca_X', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
       { currentState: 'retrocede', readChar: 'Y', nextState: 'cambia_A_X', writeChar: 'X', direction: 'L' },
       { currentState: 'cambia_A_X', readChar: 'X', nextState: 'q0', writeChar: 'X', direction: 'R' },
-      { currentState: 'cambia_A_X', readChar: 'Y', nextState: 'q0', writeChar: 'Y', direction: 'R' },
-      { currentState: 'cambia_A_X', readChar: '_', nextState: 'q0', writeChar: '_', direction: 'R' },
-
-      // 4. Reset general para dar otra pasada de ordenamiento (Burbuja)
-      { currentState: 'retorno_final', readChar: 'X', nextState: 'retorno_final', writeChar: 'X', direction: 'L' },
-      { currentState: 'retorno_final', readChar: 'Y', nextState: 'retorno_final', writeChar: 'Y', direction: 'L' },
-      { currentState: 'retorno_final', readChar: '_', nextState: 'q0', writeChar: '_', direction: 'R' }
+      { currentState: 'cambia_A_X', readChar: 'Y', nextState: 'q0', writeChar: 'Y', direction: 'R' }
     ]
   },
   parentesis_balanceados: {
@@ -93,42 +74,23 @@ const ALGORITMOS = {
   },
   el_palindromo: {
     nombre: "🔄 DETECTOR DE PALÍNDROMOS UNIVERSAL",
-    descripcion: "Compara los extremos de la palabra uno a uno eliminándolos. ¡Soporta cadenas sobre el alfabeto {A, B, C}!",
-    inputPorDefecto: "ABCBA",
+    descripcion: "Compara los extremos de la palabra uno a uno eliminándolos. ¡Soporta cualquier letra del alfabeto (A-Z) de forma dinámica!",
+    inputPorDefecto: "RECONOCER",
     transiciones: [
-      // Rama si empieza con 'A'
-      { currentState: 'q0', readChar: 'A', nextState: 'busca_A', writeChar: '_', direction: 'R' },
-      { currentState: 'busca_A', readChar: 'A', nextState: 'busca_A', writeChar: 'A', direction: 'R' },
-      { currentState: 'busca_A', readChar: 'B', nextState: 'busca_A', writeChar: 'B', direction: 'R' },
-      { currentState: 'busca_A', readChar: 'C', nextState: 'busca_A', writeChar: 'C', direction: 'R' },
-      { currentState: 'busca_A', readChar: '_', nextState: 'compara_A', writeChar: '_', direction: 'L' },
-      { currentState: 'compara_A', readChar: 'A', nextState: 'retorno', writeChar: '_', direction: 'L' },
-
-      // Rama si empieza con 'B'
-      { currentState: 'q0', readChar: 'B', nextState: 'busca_B', writeChar: '_', direction: 'R' },
-      { currentState: 'busca_B', readChar: 'A', nextState: 'busca_B', writeChar: 'A', direction: 'R' },
-      { currentState: 'busca_B', readChar: 'B', nextState: 'busca_B', writeChar: 'B', direction: 'R' },
-      { currentState: 'busca_B', readChar: 'C', nextState: 'busca_B', writeChar: 'C', direction: 'R' },
-      { currentState: 'busca_B', readChar: '_', nextState: 'compara_B', writeChar: '_', direction: 'L' },
-      { currentState: 'compara_B', readChar: 'B', nextState: 'retorno', writeChar: '_', direction: 'L' },
-
-      // Rama si empieza con 'C'
-      { currentState: 'q0', readChar: 'C', nextState: 'busca_C', writeChar: '_', direction: 'R' },
-      { currentState: 'busca_C', readChar: 'A', nextState: 'busca_C', writeChar: 'A', direction: 'R' },
-      { currentState: 'busca_C', readChar: 'B', nextState: 'busca_C', writeChar: 'B', direction: 'R' },
-      { currentState: 'busca_C', readChar: 'C', nextState: 'busca_C', writeChar: 'C', direction: 'R' },
-      { currentState: 'busca_C', readChar: '_', nextState: 'compara_C', writeChar: '_', direction: 'L' },
-      { currentState: 'compara_C', readChar: 'C', nextState: 'retorno', writeChar: '_', direction: 'L' },
-
-      // Casos de parada y retorno común
+      // 1. Lee el extremo izquierdo, lo borra (_) y salta a buscar su pareja al final
+      { currentState: 'q0', readChar: 'DINAMICO', nextState: 'busca_$', writeChar: '_', direction: 'R' },
       { currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
-      { currentState: 'compara_A', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
-      { currentState: 'compara_B', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
-      { currentState: 'compara_C', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
-      
-      { currentState: 'retorno', readChar: 'A', nextState: 'retorno', writeChar: 'A', direction: 'L' },
-      { currentState: 'retorno', readChar: 'B', nextState: 'retorno', writeChar: 'B', direction: 'L' },
-      { currentState: 'retorno', readChar: 'C', nextState: 'retorno', writeChar: 'C', direction: 'L' },
+
+      // 2. Viaja a la derecha saltando cualquier letra hasta encontrar el espacio blanco
+      { currentState: 'busca_$', readChar: 'DINAMICO', nextState: 'busca_$', writeChar: '*', direction: 'R' },
+      { currentState: 'busca_$', readChar: '_', nextState: 'compara_$', writeChar: '_', direction: 'L' },
+
+      // 3. Compara si la letra del extremo derecho coincide con la guardada. Si sí, la borra
+      { currentState: 'compara_$', readChar: '$', nextState: 'retorno', writeChar: '_', direction: 'L' },
+      { currentState: 'compara_$', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' }, // Caso longitud impar
+
+      // 4. Viaja a la izquierda saltando cualquier letra hasta el inicio para volver a empezar
+      { currentState: 'retorno', readChar: 'DINAMICO', nextState: 'retorno', writeChar: '*', direction: 'L' },
       { currentState: 'retorno', readChar: '_', nextState: 'q0', writeChar: '_', direction: 'R' }
     ]
   },
