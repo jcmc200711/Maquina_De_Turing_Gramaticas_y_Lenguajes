@@ -1,11 +1,10 @@
 import { useState, useCallback } from 'react';
-import { MarkerType } from '@xyflow/react';
-import { ReactFlow, Background, Controls } from '@xyflow/react';
+import { MarkerType, ReactFlow, Background, Controls } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-// Genera nodos y flechas iluminados dinámicamente según el estado actual
+// 1. GENERADOR DINÁMICO DE GRAFOS (REACT FLOW)
 const generarGrafoDesdeTransiciones = (transiciones, currentState, C) => {
-  // 1. Obtener todos los estados únicos implicados
+  // Obtener todos los estados únicos implicados en el proceso actual
   const estadosUnicos = Array.from(
     new Set([
       'q0', 
@@ -15,12 +14,11 @@ const generarGrafoDesdeTransiciones = (transiciones, currentState, C) => {
     ])
   );
 
-  // 2. Posicionar los nodos horizontalmente con espacio amplio (Gran formato)
+  // Mapear y posicionar los nodos en un layout horizontal escalonado
   const nodes = estadosUnicos.map((estado, index) => {
     const esActivo = estado === currentState;
     const esAceptacion = estado.toLowerCase().includes('accept');
     
-    // Asignación de colores neón según el tipo de estado
     let colorBorde = C.neon;
     if (esAceptacion) colorBorde = C.green;
     else if (estado === 'q0') colorBorde = C.amber;
@@ -28,7 +26,7 @@ const generarGrafoDesdeTransiciones = (transiciones, currentState, C) => {
     return {
       id: estado,
       data: { label: estado.toUpperCase() },
-      position: { x: index * 220 + 80, y: 150 + (index % 2 * 60) }, // Layout escalonado para evitar colisiones
+      position: { x: index * 220 + 80, y: 150 + ((index % 2) * 60) }, 
       style: {
         background: C.card,
         color: '#ffffff',
@@ -49,9 +47,8 @@ const generarGrafoDesdeTransiciones = (transiciones, currentState, C) => {
     };
   });
 
-  // 3. Crear las flechas de transición (Edges)
+  // Generar las flechas de transición (Edges) con animación en tiempo real
   const edges = transiciones.map((t, idx) => {
-    // Una transición está activa si salimos de ella en el estado actual
     const esActiva = t.currentState === currentState;
 
     return {
@@ -59,7 +56,7 @@ const generarGrafoDesdeTransiciones = (transiciones, currentState, C) => {
       source: t.currentState,
       target: t.nextState,
       label: `${t.readChar} → ${t.writeChar}, ${t.direction}`,
-      animated: esActiva, // ¡La flecha actual se mueve en tiempo real!
+      animated: esActiva, 
       type: 'bezier',
       style: {
         stroke: esActiva ? C.pink : `${C.cardBorder}`,
@@ -72,7 +69,7 @@ const generarGrafoDesdeTransiciones = (transiciones, currentState, C) => {
         fontSize: '10px',
         fontFamily: 'monospace'
       },
-      labelBgStyle: { fill: C.background, fillOpacity: 0.85 },
+      labelBgStyle: { fill: C.bg, fillOpacity: 0.85 },
       markerEnd: {
         type: MarkerType.ArrowClosed,
         width: 15,
@@ -85,8 +82,7 @@ const generarGrafoDesdeTransiciones = (transiciones, currentState, C) => {
   return { nodes, edges };
 };
 
-
-// BANCO DE ALGORITMOS PRECONFIGURADOS
+// 2. DATA DE ALGORITMOS FORMALES (Base de conocimiento)
 const ALGORITMOS = {
   suma_unaria: {
     nombre: "➕ SUMA UNARIA (111 + 11)",
@@ -100,38 +96,32 @@ const ALGORITMOS = {
       { currentState: 'borra_ultimo', readChar: '1', nextState: 'q_accept', writeChar: '_', direction: 'S' }
     ]
   },
-
   encriptado_cesar: {
     nombre: "🔐 ENCRIPTADO JULIO CÉSAR UNIVERSAL (Shift +1)",
-    descripcion: "Desplaza dinámicamente cualquier carácter del alfabeto una posición adelante (A→B, Z→A) usando aritmética modular en conjunto con el procesador dinámico.",
+    descripcion: "Desplaza dinámicamente cualquier carácter del alfabeto una posición adelante (A→B, Z→A) usando aritmética modular.",
     inputPorDefecto: "ZURICH",
     transiciones: [
       { currentState: 'q0', readChar: 'DINAMICO', nextState: 'q0', writeChar: 'SIGUIENTE_CESAR', direction: 'R' },
       { currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' }
     ]
   },
-
   ejemplo_tribus: {
     nombre: "⛺ ALGORITMO DE LAS TRIBUS (Bubble Sort Binario)",
-    descripcion: "Ordena la cinta segregando las 'X' a la izquierda y las 'Y' a la derecha mediante un método de burbuja exhaustivo que reinicia el escaneo tras cada intercambio.",
+    descripcion: "Ordena la cinta segregando las 'X' a la izquierda y las 'Y' a la derecha mediante un método de burbuja exhaustivo.",
     inputPorDefecto: "YXXYXY",
     transiciones: [
       { currentState: 'q0', readChar: 'X', nextState: 'q0', writeChar: 'X', direction: 'R' },
       { currentState: 'q0', readChar: 'Y', nextState: 'busca_Y', writeChar: 'Y', direction: 'R' },
       { currentState: 'q0', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
-      
       { currentState: 'busca_Y', readChar: 'Y', nextState: 'busca_Y', writeChar: 'Y', direction: 'R' },
       { currentState: 'busca_Y', readChar: 'X', nextState: 'intercambia', writeChar: 'Y', direction: 'L' },
       { currentState: 'busca_Y', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' },
-      
       { currentState: 'intercambia', readChar: 'Y', nextState: 'vuelve_inicio', writeChar: 'X', direction: 'L' },
-      
       { currentState: 'vuelve_inicio', readChar: 'X', nextState: 'vuelve_inicio', writeChar: 'X', direction: 'L' },
       { currentState: 'vuelve_inicio', readChar: 'Y', nextState: 'vuelve_inicio', writeChar: 'Y', direction: 'L' },
       { currentState: 'vuelve_inicio', readChar: '_', nextState: 'q0', writeChar: '_', direction: 'R' }
     ]
   },
-
   parentesis_balanceados: {
     nombre: "🧮 PARÉNTESIS BALANCEADOS",
     descripcion: "Verifica si los paréntesis de apertura y cierre están correctamente anidados eliminando los pares ( ).",
@@ -147,7 +137,6 @@ const ALGORITMOS = {
       { currentState: 'verificar_limpio', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' }
     ]
   },
-
   contador_binario: {
     nombre: "🔢 CONTADOR BINARIO (+1)",
     descripcion: "Suma 1 a cualquier número binario. Se mueve al final y viaja hacia atrás aplicando el acarreo de bits.",
@@ -164,10 +153,9 @@ const ALGORITMOS = {
       { currentState: 'retorno', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'R' }
     ]
   },
-
   el_palindromo: {
     nombre: "🔄 DETECTOR DE PALÍNDROMOS UNIVERSAL",
-    descripcion: "Compara los extremos de la palabra uno a uno eliminándolos. ¡Soporta cualquier letra del alfabeto (A-Z) de forma dinámica!",
+    descripcion: "Compara los extremos de la palabra uno a uno eliminándolos. ¡Soporta cualquier letra de forma dinámica!",
     inputPorDefecto: "RECONOCER",
     transiciones: [
       { currentState: 'q0', readChar: 'DINAMICO', nextState: 'busca_$', writeChar: '_', direction: 'R' },
@@ -180,7 +168,6 @@ const ALGORITMOS = {
       { currentState: 'retorno', readChar: '_', nextState: 'q0', writeChar: '_', direction: 'R' }
     ]
   },
-
   generador_fractales: {
     nombre: "🌿 GENERADOR DE FRACTALES (L-System)",
     descripcion: "Aplica reglas de reescritura de fractales de texto. Aquí expande el axioma 'F' usando la regla clásica F → F+F.",
@@ -192,7 +179,6 @@ const ALGORITMOS = {
       { currentState: 'escribe_F', readChar: '_', nextState: 'q_accept', writeChar: '_', direction: 'S' }
     ]
   },
-
   elementos_sumas: {
     nombre: "📊 IDENTIFICADOR DE ELEMENTOS DE SUMA",
     descripcion: "Analiza sintácticamente la ecuación reconociendo los sumandos (S) y los operadores (+).",
@@ -206,26 +192,26 @@ const ALGORITMOS = {
   }
 };
 
+// 3. PALETA DE COLORES CYBERPUNK DE CONTROL URBANO
 const C = {
   bg: '#030811', card: '#071224', cardBorder: '#0b2244',
   neon: '#00ffff', green: '#39ff14', pink: '#ff007f', amber: '#ffaa00',
   text: '#d1e4ff', textDim: '#3a537d', textMid: '#688dbf',
 };
 
+// 4. SISTEMA DE ESTILOS CSS-IN-JS
 const styles = {
-  root: { minHeight: '100vh', background: C.bg, color: C.text, fontFamily: '"Share Tech Mono", monospace', padding: '20px 0', position: 'relative' },
+  root: { minHeight: '100vh', background: C.bg, color: C.text, fontFamily: 'monospace', padding: '20px 0', position: 'relative' },
   gridBg: { position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `linear-gradient(rgba(0,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,0.02) 1px, transparent 1px)`, backgroundSize: '30px 30px', pointerEvents: 'none', zIndex: 0 },
   container: { position: 'relative', zIndex: 1, maxWidth: '1500px', margin: '0 auto', padding: '0 20px' },
   header: { borderBottom: `2px solid ${C.cardBorder}`, paddingBottom: '16px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   headerTitle: { fontSize: '32px', fontWeight: '800', letterSpacing: '3px', background: `linear-gradient(90deg, ${C.neon}, ${C.green})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 },
   headerSub: { fontSize: '12px', color: C.textMid, letterSpacing: '2px', marginTop: '4px' },
-  
   glossaryGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' },
   glossaryCard: { background: `${C.card}bb`, border: `1px solid ${C.cardBorder}`, borderRadius: '8px', padding: '16px' },
   glossaryItem: { fontSize: '11px', marginBottom: '10px', lineHeight: '1.4' },
   glossaryTerm: { color: C.neon, fontWeight: '700' },
   chomskyTerm: { color: C.pink, fontWeight: '700' },
-
   grid: { display: 'grid', gridTemplateColumns: '380px 1fr', gap: '24px', marginBottom: '24px' },
   card: { background: C.card, border: `1px solid ${C.cardBorder}`, borderRadius: '8px', padding: '20px', position: 'relative', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' },
   sectionTitle: (color = C.neon) => ({ fontSize: '12px', fontWeight: '700', color, letterSpacing: '2px', marginBottom: '16px', textTransform: 'uppercase' }),
@@ -233,7 +219,6 @@ const styles = {
   selectAlgo: { width: '100%', background: '#040d1a', border: `2px solid ${C.neon}`, borderRadius: '6px', padding: '10px', color: C.neon, fontFamily: 'inherit', fontSize: '12px', fontWeight: '700', outline: 'none', marginBottom: '14px', cursor: 'pointer' },
   btnPrimary: { flex: 1, background: `linear-gradient(135deg, ${C.green}33, ${C.green}11)`, border: `2px solid ${C.green}`, borderRadius: '4px', color: C.green, fontFamily: 'inherit', fontSize: '11px', fontWeight: '800', padding: '10px', cursor: 'pointer', letterSpacing: '1px' },
   btnSecondary: { background: 'transparent', border: `1px solid ${C.cardBorder}`, borderRadius: '4px', color: C.textMid, fontFamily: 'inherit', fontSize: '11px', padding: '10px 16px', cursor: 'pointer' },
-  
   tapeWrap: { display: 'flex', alignItems: 'center', gap: '8px', overflowX: 'auto', padding: '35px 20px 35px', background: '#01040a', border: `2px solid ${C.cardBorder}`, borderRadius: '8px', boxShadow: 'inset 0 0 15px rgba(0,0,0,0.8)' },
   tapeCell: (isHead) => ({
     flexShrink: 0, width: '54px', height: '58px',
@@ -251,36 +236,14 @@ const styles = {
     color: dir === 'R' ? C.green : dir === 'L' ? C.neon : C.amber,
     textShadow: `0 0 8px ${dir === 'R' ? C.green : dir === 'L' ? C.neon : C.amber}`
   }),
-
   statusBadge: (status) => ({ padding: '6px 16px', borderRadius: '4px', fontSize: '12px', border: `2px solid ${status === 'accepted' ? C.green : status === 'rejected' ? C.pink : C.neon}`, color: status === 'accepted' ? C.green : status === 'rejected' ? C.pink : C.neon, fontWeight: '800', textShadow: `0 0 5px ${status==='accepted'?C.green:C.pink}` }),
-  
-  // Tabla Formal Estilo Grande
   table: { width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px', marginTop: '10px' },
   th: { borderBottom: `2px solid ${C.cardBorder}`, padding: '12px 16px', color: C.neon, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' },
   td: { padding: '12px 16px', borderBottom: `1px solid #041021`, fontFamily: 'monospace' },
-
-  diagramCard: {
-    background: C.card,
-    border: `1px solid ${C.cardBorder}`,
-    borderRadius: '8px',
-    padding: '20px',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '220px'
-  },
-  diagramImg: {
-    maxWidth: '100%',
-    maxHeight: '250px',
-    objectFit: 'contain',
-    filter: 'drop-shadow(0 0 8px rgba(0, 255, 255, 0.3))', // Efecto brillo neón suave
-    marginTop: '10px',
-    borderRadius: '4px'
-  }
-
+  diagramCard: { background: C.card, border: `1px solid ${C.cardBorder}`, borderRadius: '8px', padding: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyCenter: 'center', minHeight: '220px' },
+  diagramImg: { maxWidth: '100%', maxHeight: '250px', objectFit: 'contain', filter: 'drop-shadow(0 0 8px rgba(0, 255, 255, 0.3))', marginTop: '10px', borderRadius: '4px' }
 };
+
 
 export default function App() {
   const [algoritmoActual, setAlgoritmoActual] = useState('suma_unaria');
@@ -301,16 +264,15 @@ export default function App() {
   const [stepCount, setStepCount] = useState(0);
   const [logs, setLogs] = useState([`// SYSTEM: algoritmo [SUMA_UNARIA] cargado correctamente.`]);
   const [lastMove, setLastMove] = useState({ dir: 'S', text: 'MÁQUINA INICIALIZADA EN POSICIÓN [2]' });
-  const [activeRuleIdx, setActiveRuleIdx] = useState(-1); // Rastrea cuál regla de la tabla se está aplicando justo ahora
+  const [activeRuleIdx, setActiveRuleIdx] = useState(-1);
 
+  // Inicializador seguro de la cinta y cabezal
   const initMachine = useCallback((inputOpcional, transicionesOpcionales, idAlgoOpcional) => {
     const cadenaALeer = inputOpcional !== undefined ? inputOpcional : tapeInput;
     const listaTransiciones = transicionesOpcionales !== undefined ? transicionesOpcionales : transitions;
     const nombreAlgoritmo = idAlgoOpcional !== undefined ? idAlgoOpcional : algoritmoActual;
 
-    // 🌟 LA REPARACIÓN: Convertimos la cadena a mayúsculas antes de romperla en caracteres
     const t = cadenaALeer.toUpperCase().split(''); 
-    
     setTape(['_', '_', ...(t.length ? t : ['_']), '_', '_']);
     setHeadPosition(2);
     
@@ -323,31 +285,30 @@ export default function App() {
     setLogs([`// SYSTEM: algoritmo [${nombreAlgoritmo.toUpperCase()}] cargado correctamente.`]);
   }, [tapeInput, transitions, algoritmoActual]);
 
+  // MOTOR PROCESADOR DE TRANSICIONES
   const stepExecution = () => {
     if (status === 'accepted' || status === 'rejected') return;
     const currentChar = tape[headPosition] || '_';
     
-    // --- 🌟 EL TRUCO DE LA VARIABLE DINÁMICA ---
-    // 1. Si estamos buscando o comparando, extraemos qué letra guardamos en el estado actual
     let letraGuardada = null;
     if (currentState.includes('_') && !currentState.endsWith('_')) {
-      letraGuardada = currentState.split('_')[1]; // Ej: de "busca_Z" extrae "Z"
+      letraGuardada = currentState.split('_')[1]; 
     }
 
-    // 2. Buscamos una regla exacta o genérica
+    // Buscar regla exacta o comodines dinámicos
     let ruleIdx = transitions.findIndex(t => {
-      // Reemplazamos el comodín $ por la letra real que tiene la máquina en memoria
       const tState = t.currentState.replace('$', letraGuardada);
       const tRead = t.readChar === '$' ? letraGuardada : t.readChar;
       
       return tState === currentState && 
-             (tRead === currentChar || tRead === 'DINAMICO' && currentChar !== '_');
+             (tRead === currentChar || (tRead === 'DINAMICO' && currentChar !== '_'));
     });
 
     if (ruleIdx === -1) {
       ruleIdx = transitions.findIndex(t => t.currentState === currentState && t.readChar === '*');
     }
 
+    // Detención por falta de reglas (Rechazo implícito)
     if (ruleIdx === -1) {
       setStatus('rejected');
       setActiveRuleIdx(-1);
@@ -359,25 +320,22 @@ export default function App() {
     const rule = transitions[ruleIdx];
     setActiveRuleIdx(ruleIdx);
 
-    // 3. Al transicionar, si el próximo estado tiene $, lo cambiamos por la letra leída actual
     let nextStateDinamico = rule.nextState;
     if (rule.nextState.includes('$')) {
-      // Si venimos de q0, la letra guardada es la que acabamos de leer
       const letraAFormatear = letraGuardada || currentChar;
       nextStateDinamico = rule.nextState.replace('$', letraAFormatear);
     }
-    // ---------------------------------------------
 
+    // Escritura en cinta
     const newTape = [...tape];
-    // --- SOPORTE CÉSAR DINÁMICO ---
     let charAQuedar = rule.writeChar === '*' ? currentChar : rule.writeChar;
     if (rule.writeChar === 'SIGUIENTE_CESAR') {
       const code = currentChar.charCodeAt(0);
-      // Si es Z, vuelve a la A. Si no, avanza 1 en el abecedario ASCII (A->B, B->C...)
       charAQuedar = currentChar === 'Z' ? 'A' : String.fromCharCode(code + 1);
     }
     newTape[headPosition] = charAQuedar;
     
+    // Movimiento del Cabezal e inyección de espacios en blanco
     const antiguaPosicion = headPosition;
     let pos = headPosition;
     if (rule.direction === 'R') pos++;
@@ -388,14 +346,14 @@ export default function App() {
 
     setTape(newTape);
     setHeadPosition(pos);
-    setCurrentState(nextStateDinamico); // 🌟 Usamos el estado dinámico procesado
+    setCurrentState(nextStateDinamico); 
     setStepCount(p => p + 1);
     
     const dirTexto = rule.direction === 'R' ? `DERECHA (→) de pos ${antiguaPosicion} a pos ${pos}` : rule.direction === 'L' ? `IZQUIERDA (←) de pos ${antiguaPosicion} a pos ${pos}` : `STAY (•) en pos ${pos}`;
     setLastMove({ dir: rule.direction, text: dirTexto });
-
     setLogs(p => [`// PASO ${stepCount + 1}: δ(${currentState},'${currentChar}') → (${nextStateDinamico},'${charAQuedar}',${rule.direction})`, ...p]);
 
+    // Verificar aceptación o rechazo explícito
     if (nextStateDinamico.toLowerCase().includes('accept')) {
       setStatus('accepted');
       setLogs(p => ['// COMPUTACIÓN COMPLETADA: Cadena aceptada y validada con éxito ✓', ...p]);
@@ -405,13 +363,14 @@ export default function App() {
     }
   };
 
+
   return (
     <>
       <div style={styles.root}>
         <div style={styles.gridBg} />
         <div style={styles.container}>
           
-          {/* HEADER */}
+          {/* HEADER PRINCIPAL */}
           <header style={styles.header}>
             <div>
               <h1 style={styles.headerTitle}>MÁQUINA DE TURING //</h1>
@@ -420,99 +379,50 @@ export default function App() {
             <div style={styles.statusBadge(status)}>{status.toUpperCase()}</div>
           </header>
 
-          {/* DOS GLOSARIOS FORMALES COLAPSABLES */}
+          {/* ACORDEONES INFORMATIVOS */}
           <div style={styles.glossaryGrid}>
-            
-            {/* PANEL: ELEMENTOS DE LA MÁQUINA DE TURING */}
             <div style={styles.glossaryCard}>
-              {/* CABECERA CLICKABLE */}
               <div 
-                style={{ ...styles.sectionTitle(C.neon), cursor: 'pointer', display: 'flex', justifyContent: 'between', alignItems: 'center', userSelect: 'none' }}
+                style={{ ...styles.sectionTitle(C.neon), cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', userSelect: 'none' }}
                 onClick={() => setGlosarioTuringAbierto(!glosarioTuringAbierto)}
               >
-                <span>📋 ELEMENTOS FORMALES DE LA MÁQUINA DE TURING M = {"⟨Q, Σ, Γ, δ, q0, B, F⟩"}</span>
-                <span style={{ marginLeft: '10px', color: C.neon }}>{glosarioTuringAbierto ? '▼' : '►'}</span>
+                <span>📋 ELEMENTOS FORMALES DE LA MÁQUINA DE TURING M = ⟨Q, Σ, Γ, δ, q0, B, F⟩</span>
+                <span>{glosarioTuringAbierto ? '▼' : '►'}</span>
               </div>
-              
-              {/* CONTENIDO DESPLEGABLE */}
               {glosarioTuringAbierto && (
                 <div style={{ marginTop: '12px', borderTop: `1px dashed ${C.cardBorder}`, paddingTop: '10px' }}>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.glossaryTerm}>Q (Conjunto Finito de Estados):</span> Es el "cerebro" o la memoria interna del procesador de control. Representa todas las situaciones lógicas posibles en las que el autómata puede encontrarse en un instante dado.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.glossaryTerm}>Σ (Alfabeto de Entrada):</span> El conjunto finito de símbolos válidos y permitidos que el usuario puede escribir en la cinta *antes* de iniciar la computación. **Restricción formal:** {"(Σ ∩ {B} = ∅)"}.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.glossaryTerm}>Γ (Alfabeto de la Cinta):</span> El superconjunto de caracteres legibles y escribibles en la cinta. Contiene a todo el alfabeto de entrada y añade símbolos de trabajo {"(Σ ⊂ Γ)"}.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.glossaryTerm}>B o _ (Símbolo Blanco / Blank):</span> Representa una celda vacía en la cinta. Al inicio, delimita los bordes de la cadena de entrada y se extiende infinitamente proveyendo memoria ilimitada.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.glossaryTerm}>δ (Función de Transición):</span> El mapeo matemático detallado como {"δ: Q × Γ → Q × Γ × {L, R, S}"}. Determina el nuevo estado, qué escribir y hacia dónde mover el cabezal.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.glossaryTerm}>q0 (Estado Inicial):</span> Es el estado único del conjunto Q {"(q0 ∈ Q)"} donde la Unidad de Control de la máquina se posiciona de forma automática al iniciar.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.glossaryTerm}>F o q_accept (Conjunto de Estados Finales):</span> Subconjunto de estados {"(F ⊆ Q)"} que determinan la detención exitosa del sistema (la cadena pertenece al lenguaje).
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.glossaryTerm}>Cabezal de Lectura/Escritura:</span> El puntero físico-lógico de acceso a la cinta. Apunta a una sola celda a la vez, lee, edita y se desplaza.
-                  </div>
+                  <div style={styles.glossaryItem}><span style={styles.glossaryTerm}>Q (Estados):</span> Situaciones lógicas finitas del autómata.</div>
+                  <div style={styles.glossaryItem}><span style={styles.glossaryTerm}>Σ (Alfabeto Entrada):</span> Caracteres iniciales válidos.</div>
+                  <div style={styles.glossaryItem}><span style={styles.glossaryTerm}>Γ (Alfabeto Cinta):</span> Símbolos legibles y escribibles (incluye Blanco).</div>
+                  <div style={styles.glossaryItem}><span style={styles.glossaryTerm}>δ (Transición):</span> Mapeo de control matemático Q × Γ → Q × Γ × {"{L, R, S}"}.</div>
                 </div>
               )}
             </div>
 
-            {/* PANEL: JERARQUÍA DE CHOMSKY */}
             <div style={styles.glossaryCard}>
-              {/* CABECERA CLICKABLE */}
               <div 
-                style={{ ...styles.sectionTitle(C.pink), cursor: 'pointer', display: 'flex', justifyContent: 'between', alignItems: 'center', userSelect: 'none' }}
+                style={{ ...styles.sectionTitle(C.pink), cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', userSelect: 'none' }}
                 onClick={() => setGlosarioChomskyAbierto(!glosarioChomskyAbierto)}
               >
-                <span>🏛️ JERARQUÍA DE CHOMSKY (Clasificación de Lenguajes y Autómatas)</span>
-                <span style={{ marginLeft: '10px', color: C.pink }}>{glosarioChomskyAbierto ? '▼' : '►'}</span>
+                <span>🏛️ JERARQUÍA DE CHOMSKY (Clasificación de Lenguajes)</span>
+                <span>{glosarioChomskyAbierto ? '▼' : '►'}</span>
               </div>
-              
-              {/* CONTENIDO DESPLEGABLE */}
               {glosarioChomskyAbierto && (
                 <div style={{ marginTop: '12px', borderTop: `1px dashed ${C.cardBorder}`, paddingTop: '10px' }}>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.chomskyTerm}>Tipo 0 (Gramáticas No Restringidas / Lenguajes Recursivamente Enumerables):</span> 
-                    Reconocidas universalmente por las **Máquinas de Turing**. No poseen restricciones en sus reglas de producción de cadenas {"(α → β)"}. Modelan cualquier problema computable.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.chomskyTerm}>Tipo 1 (Gramáticas Sensibles al Contexto / Lenguajes Sensibles al Contexto):</span> 
-                    Reconocidas por **Autómatas Linealmente Acotados (LBA)**. La longitud de la cadena sustituida debe ser mayor o igual a la original {"(|α| ≤ |β|)"}. Espacio limitado al input.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.chomskyTerm}>Tipo 2 (Gramáticas Libres de Contexto / Lenguajes Independientes del Contexto):</span> 
-                    Reconocidas por los **Autómatas de Pila (PDA)**. Sustituyen un único símbolo no-terminal {"(A → β)"}. Utilizan una memoria auxiliar tipo LIFO (Pila) para balanceos y sintaxis.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={styles.chomskyTerm}>Tipo 3 (Gramáticas Regulares / Lenguajes Regulares):</span> 
-                    Reconocidas por los **Autómatas Finitos (AFD / AFND)**. Carecen por completo de memoria dinámica externa; solo transicionan entre estados rígidos. Usados en Regex y análisis léxico.
-                  </div>
-                  <div style={styles.glossaryItem}>
-                    <span style={{ color: C.amber, fontWeight: '700' }}>Inclusión de Conjuntos Formales:</span> 
-                    Cumplen un orden jerárquico estricto de contención: {"Tipo 3 ⊂ Tipo 2 ⊂ Tipo 1 ⊂ Tipo 0"}. Todo lenguaje regular es libre de contexto, y todos ellos pueden ser resueltos por tu Máquina de Turing.
-                  </div>
+                  <div style={styles.glossaryItem}><span style={styles.chomskyTerm}>Tipo 0 (No Restringidos):</span> Reconocidos nativamente por las **Máquinas de Turing**.</div>
+                  <div style={styles.glossaryItem}><span style={styles.chomskyTerm}>Tipo 2 (Libres de Contexto):</span> Reconocidos por los **Autómatas de Pila (PDA)**.</div>
                 </div>
               )}
             </div>
-
           </div>
 
-          {/* INTERFAZ PRINCIPAL EN DOS COLUMNAS */}
+          {/* TRABAJO PRINCIPAL */}
           <div style={styles.grid}>
             
-            {/* PANEL IZQUIERDO DE CONTROL */}
+            {/* PANEL DE CONTROL IZQUIERDO */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={styles.card}>
                 <div style={styles.sectionTitle(C.neon)}>🛠️ CARGAR LÓGICA DE COMPUTACIÓN</div>
-                
                 <select 
                   style={styles.selectAlgo} 
                   value={algoritmoActual} 
@@ -529,60 +439,29 @@ export default function App() {
                     <option key={id} value={id} style={{background: C.bg}}>{ALGORITMOS[id].nombre}</option>
                   ))}
                 </select>
-
-                <p style={{ fontSize: '11px', color: C.textMid, marginBottom: '16px', lineHeight: '1.4' }}>
-                  {ALGORITMOS[algoritmoActual].descripcion}
-                </p>
-
+                <p style={{ fontSize: '11px', color: C.textMid, marginBottom: '16px', lineHeight: '1.4' }}>{ALGORITMOS[algoritmoActual]?.descripcion}</p>
                 <label style={{ fontSize: '10px', color: C.textDim, display: 'block', marginBottom: '6px', letterSpacing: '1px' }}>CINTA DE ENTRADA (Σ)</label>
-                <input
-                  style={styles.input}
-                  type="text"
-                  value={tapeInput}
-                  onChange={e => setTapeInput(e.target.value)}
-                  disabled={status !== 'idle'}
-                />
-
+                <input style={styles.input} type="text" value={tapeInput} onChange={e => setTapeInput(e.target.value)} disabled={status !== 'idle'} />
                 <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
                   <button style={styles.btnPrimary} onClick={stepExecution} disabled={status==='accepted'||status==='rejected'}>▶ EJECUTAR PASO</button>
                   <button style={styles.btnSecondary} onClick={() => initMachine()}>↺ RESET</button>
                 </div>
               </div>
-              
-              {/* MINI RASTREADOR REUBICADO */}
               <div style={{...styles.card, padding: '12px 20px', borderLeft: `3px solid ${C.amber}`}}>
                 <div style={{fontSize: '9px', color: C.textDim, letterSpacing: '1px'}}>ÚLTIMO MOVIMIENTO CABEZAL</div>
                 <div style={{fontSize: '11px', fontWeight: 'bold', color: '#fff', marginTop: '2px'}}>{lastMove.text}</div>
               </div>
-              {/* PANEL IZQUIERDO DE CONTROL */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              
-              {/* Tarjeta de Cargar Lógica (Ya la tienes) */}
-              <div style={styles.card}> ... </div>
-              
-              {/* Mini Rastreador (Ya lo tienes) */}
-              <div style={{...styles.card, padding: '12px 20px', borderLeft: `3px solid ${C.amber}`}}> ... </div>
-
-              {/* 🌟 NUEVO PANEL: DIAGRAMA DE ESTADOS FORMAL (δ) */}
               <div style={styles.diagramCard}>
-                <div style={styles.sectionTitle(C.pink)}>📊 GRAFO DE TRANSICIONES / DIAGRAMA DE ESTADOS</div>
-                {ALGORITMOS[algoritmoActual].diagrama ? (
-                  <img 
-                    src={ALGORITMOS[algoritmoActual].diagrama} 
-                    alt={`Diagrama de ${ALGORITMOS[algoritmoActual].nombre}`}
-                    style={styles.diagramImg}
-                  />
+                <div style={styles.sectionTitle(C.pink)}>📊 DIAGRAMA DE ESTADOS</div>
+                {ALGORITMOS[algoritmoActual]?.diagrama ? (
+                  <img src={ALGORITMOS[algoritmoActual].diagrama} alt="Diagrama estático" style={styles.diagramImg} />
                 ) : (
-                  <div style={{ color: C.textDim, fontSize: '12px', fontStyle: 'italic', marginTop: '20px' }}>
-                    [ GRAFO NO DISPONIBLE PARA ESTE ALGORITMO ]
-                  </div>
+                  <div style={{ color: C.textDim, fontSize: '12px', fontStyle: 'italic', marginTop: '20px' }}>[ GRAFO ESTÁTICO NO CONFIGURADO ]</div>
                 )}
               </div>
-
-            </div>
             </div>
 
-            {/* PANEL DERECHO: MONITOR DE CINTA Y CONSOLA */}
+            {/* PANEL MONITOR DERECHO */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={styles.card}>
                 <div style={styles.sectionTitle(C.textMid)}>◈ MONITOR DE TRABAJO DE CINTA FIJA (Γ)</div>
@@ -603,72 +482,59 @@ export default function App() {
                     );
                   })}
                 </div>
-
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginTop: '20px' }}>
                   <div style={{ background: '#020612', padding: '12px', borderRadius: '4px', textAlign: 'center', border: `1px solid ${C.cardBorder}` }}>
-                    <div style={{ fontSize: '9px', color: C.textDim, letterSpacing: '1px' }}>ESTADO ACTUAL (Q)</div>
+                    <div style={{ fontSize: '9px', color: C.textDim }}>ESTADO ACTUAL (Q)</div>
                     <div style={{ color: C.neon, fontWeight: '700', fontSize: '16px', marginTop: '4px' }}>{currentState}</div>
                   </div>
                   <div style={{ background: '#020612', padding: '12px', borderRadius: '4px', textAlign: 'center', border: `1px solid ${C.cardBorder}` }}>
-                    <div style={{ fontSize: '9px', color: C.textDim, letterSpacing: '1px' }}>POSICIÓN CABEZAL</div>
+                    <div style={{ fontSize: '9px', color: C.textDim }}>POSICIÓN CABEZAL</div>
                     <div style={{ color: C.green, fontWeight: '700', fontSize: '16px', marginTop: '4px' }}>{headPosition}</div>
                   </div>
                   <div style={{ background: '#020612', padding: '12px', borderRadius: '4px', textAlign: 'center', border: `1px solid ${C.cardBorder}` }}>
-                    <div style={{ fontSize: '9px', color: C.textDim, letterSpacing: '1px' }}>PASOS CALCULADOS</div>
+                    <div style={{ fontSize: '9px', color: C.textDim }}>PASOS CALCULADOS</div>
                     <div style={{ color: C.amber, fontWeight: '700', fontSize: '16px', marginTop: '4px' }}>{stepCount}</div>
                   </div>
                 </div>
               </div>
-
-              {/* LOGS / CONSOLA */}
               <div style={styles.card}>
-                <div style={{ fontSize: '10px', color: C.textDim, marginBottom: '6px', letterSpacing: '1px' }}>CONSOLE_OUTPUT // REGISTRO DE TRABAJO δ</div>
+                <div style={{ fontSize: '10px', color: C.textDim, marginBottom: '6px' }}>CONSOLE_OUTPUT // REGISTRO DE TRABAJO δ</div>
                 <div style={{ background: '#01050f', padding: '12px', height: '110px', overflowY: 'auto', fontSize: '12px', borderRadius: '4px', border: `1px solid ${C.cardBorder}` }}>
                   {logs.map((l, idx) => <div key={idx} style={{ padding: '2px 0', color: l.includes('COMPLETADA')? C.green : l.includes('ERR')? C.pink : C.textMid, fontFamily: 'monospace' }}>{l}</div>)}
                 </div>
               </div>
             </div>
+
           </div>
 
-          {/* NUEVO PANEL EXTENDIDO GIGANTE: TABLA DE TRANSICIONES FORMAL (δ) */}
+          {/* MATRIZ FORMAL */}
           <div style={styles.card}>
-            <div style={styles.sectionTitle(C.green)}>💻 MATRIZ FORMAL DE LA FUNCIÓN DE TRANSICIÓN δ (ALGORITMO ACTUAL)</div>
+            <div style={styles.sectionTitle(C.green)}>💻 MATRIZ FORMAL DE LA FUNCIÓN DE TRANSICIÓN δ</div>
             <div style={{ overflowX: 'auto' }}>
               <table style={styles.table}>
                 <thead>
                   <tr>
                     <th style={styles.th}>Fila</th>
-                    <th style={styles.th}>Estado Origen (Q)</th>
-                    <th style={styles.th}>Carácter Leído (Γ)</th>
-                    <th style={styles.th}>Estado Destino (Q)</th>
-                    <th style={styles.th}>Carácter Escrito (Γ)</th>
-                    <th style={styles.th}>Dirección Cabezal</th>
-                    <th style={styles.th}>Estado Operación</th>
+                    <th style={styles.th}>Estado Origen</th>
+                    <th style={styles.th}>Lectura</th>
+                    <th style={styles.th}>Estado Destino</th>
+                    <th style={styles.th}>Escritura</th>
+                    <th style={styles.th}>Dirección</th>
+                    <th style={styles.th}>Operación</th>
                   </tr>
                 </thead>
                 <tbody>
                   {transitions.map((t, idx) => {
                     const isRowActive = idx === activeRuleIdx;
                     return (
-                      <tr 
-                        key={idx} 
-                        style={{ 
-                          background: isRowActive ? `${C.green}15` : 'transparent',
-                          transition: 'background 0.2s ease',
-                          color: isRowActive ? C.green : C.text
-                        }}
-                      >
+                      <tr key={idx} style={{ background: isRowActive ? `${C.green}15` : 'transparent', color: isRowActive ? C.green : C.text }}>
                         <td style={{...styles.td, color: isRowActive ? C.green : C.textDim}}>[{idx}]</td>
                         <td style={{...styles.td, fontWeight: isRowActive ? '900' : '400'}}>{t.currentState}</td>
-                        <td style={{...styles.td, color: isRowActive ? C.green : C.amber, fontWeight: 'bold'}}>{t.readChar === '_' ? 'B (Blanco)' : t.readChar}</td>
+                        <td style={{...styles.td, color: isRowActive ? C.green : C.amber}}>{t.readChar === '_' ? 'B (Blanco)' : t.readChar}</td>
                         <td style={{...styles.td}}>{t.nextState}</td>
                         <td style={{...styles.td, color: isRowActive ? C.green : C.pink}}>{t.writeChar === '_' ? 'B (Blanco)' : t.writeChar === '*' ? 'Mismo' : t.writeChar}</td>
-                        <td style={{...styles.td, fontWeight: 'bold'}}>
-                          {t.direction === 'R' ? 'DERECHA (→)' : t.direction === 'L' ? 'IZQUIERDA (←)' : 'STAY (•)'}
-                        </td>
-                        <td style={{...styles.td, fontSize: '11px', color: isRowActive ? C.green : C.textDim}}>
-                          {isRowActive ? '⚡ EJECUTANDO' : '⚪ EN ESPERA'}
-                        </td>
+                        <td style={{...styles.td}}>{t.direction === 'R' ? 'DERECHA (→)' : t.direction === 'L' ? 'IZQUIERDA (←)' : 'STAY (•)'}</td>
+                        <td style={{...styles.td, fontSize: '11px'}}>{isRowActive ? '⚡ EJECUTANDO' : '⚪ EN ESPERA'}</td>
                       </tr>
                     );
                   })}
@@ -677,67 +543,31 @@ export default function App() {
             </div>
           </div>
 
-          {/* 🌟 NUEVO GRANDE Y BAJO LA TABLA: VISOR DE GRAFO INTERACTIVO NEÓN */}
-  <div style={{ ...styles.card, height: '450px', padding: '0px', relative: 'relative', overflow: 'hidden' }}>
-    <div style={{ ...styles.sectionTitle(C.pink), padding: '16px 20px 0 20px' }}>
-      📊 DIAGRAMA DE TRANSICIONES INTERACTIVO (δ)
-    </div>
-    
-    <div style={{ width: '100%', height: '390px' }}>
-      {(() => {
-        // Obtenemos los nodos y flechas calculados en tiempo real para el paso actual
-        const { nodes, edges } = generarGrafoDesdeTransiciones(transitions, currentState, C);
-        
-        return (
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            fitView
-            nodesConnectable={false}
-            nodesDraggable={true} // Permite al usuario reacomodar los círculos si se enciman
-            zoomOnScroll={true}
-            style={{ background: '#01040a' }}
-          >
-            {/* Fondo de rejilla Cyberpunk */}
-            <Background color="#00ffff" opacity={0.03} gap={20} size={1} />
-            {/* Controles de Zoom nativos montados en la esquina */}
-            <Controls style={{ background: C.card, border: `1px solid ${C.cardBorder}`, color: '#fff' }} />
-          </ReactFlow>
-        );
-      })()}
-    </div>
-  </div>
+          {/* DIAGRAMA INTERACTIVO (REACT FLOW) */}
+          <div style={{ ...styles.card, height: '450px', padding: '0px', position: 'relative', overflow: 'hidden', marginTop: '24px' }}>
+            <div style={{ ...styles.sectionTitle(C.pink), padding: '16px 20px 0 20px' }}>📊 DIAGRAMA DE TRANSICIONES INTERACTIVO (δ)</div>
+            <div style={{ width: '100%', height: '390px' }}>
+              {(() => {
+                const { nodes, edges } = generarGrafoDesdeTransiciones(transitions, currentState, C);
+                return (
+                  <ReactFlow nodes={nodes} edges={edges} fitView nodesConnectable={false} nodesDraggable zoomOnScroll style={{ background: '#01040a' }}>
+                    <Background color="#00ffff" opacity={0.03} gap={20} size={1} />
+                    <Controls style={{ background: C.card, border: `1px solid ${C.cardBorder}`, color: '#fff' }} />
+                  </ReactFlow>
+                );
+              })()}
+            </div>
+          </div>
 
         </div>
       </div>
       
-      {/* Estilos inyectados seguros con soporte para scrollbars neón */}
       <style dangerouslySetInnerHTML={{__html: `
-        @keyframes bounce {
-          from { transform: translateY(0); }
-          to { transform: translateY(4px); }
-        }
-
-        ::-webkit-scrollbar {
-          width: 6px;
-          height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-          background: #01040a;
-          border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: #00ffff33;
-          border: 1px solid #00ffff;
-          border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: #00ffff66;
-        }
-        * {
-          scrollbar-width: thin;
-          scrollbar-color: #00ffff33 #01040a;
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #01040a; }
+        ::-webkit-scrollbar-thumb { background: #00ffff33; border: 1px solid #00ffff; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00ffff66; }
+        * { scrollbar-width: thin; scrollbar-color: #00ffff33 #01040a; }
       `}} />
     </>
   );
